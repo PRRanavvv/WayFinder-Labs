@@ -1,0 +1,10 @@
+{
+  "name": "@wayfinder/ai-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node examples/demo.js"
+  }
+}
+
