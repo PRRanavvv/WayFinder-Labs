@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+*/node_modules/
+.pnp/
+.pnp.cjs
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# Build output
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.output/
+out/
+storybook-static/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Databases and generated local state
+mongo-data/
+mongodb/
+mongodb-*/
+dump/
+dumps/
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+*.lock
+*.wt
+WiredTiger*
+journal/
+diagnostic.data/
+
+# Binaries and executables
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.msi
+*.pkg
+
+# Temporary and research artifacts
+tmp/
+temp/
+.cache/
+.turbo/
+.parcel-cache/
+.vite/
+*.tmp
+*.bak
+*.swp
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor junk
+.idea/
+.vscode/
+*.code-workspace
+
+# Test/runtime artifacts
+playwright-report/
+test-results/
+screenshots/generated/
+

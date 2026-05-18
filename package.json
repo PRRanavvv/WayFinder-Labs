@@ -1,0 +1,22 @@
+{
+  "name": "wayfinder-travel-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Public showcase repository for WayFinder, an AI-assisted adaptive travel planning platform.",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "ai-engine"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace frontend",
+    "dev:api": "npm run dev --workspace backend",
+    "demo:ai": "npm run demo --workspace ai-engine",
+    "lint": "npm run lint --workspace frontend",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
+
