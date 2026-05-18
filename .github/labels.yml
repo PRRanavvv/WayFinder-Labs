@@ -1,0 +1,17 @@
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something is not working.
+  - name: enhancement
+    color: a2eeef
+    description: Public showcase improvement.
+  - name: documentation
+    color: 0075ca
+    description: Documentation update.
+  - name: good first issue
+    color: 7057ff
+    description: Good entry point for contributors.
+  - name: public-safety
+    color: fbca04
+    description: Related to safe public repository boundaries.
+
