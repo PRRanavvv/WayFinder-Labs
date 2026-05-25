@@ -2,28 +2,88 @@
 
 # WayFinder
 
-### AI-assisted travel planning that learns how people actually travel.
+### AI-assisted group travel planning that learns how people actually travel.
 
-[![Status](https://img.shields.io/badge/status-public%20showcase-0f766e)](#)
+[![Status](https://img.shields.io/badge/status-active%20MVP-0f766e)](#)
 [![Stack](https://img.shields.io/badge/stack-React%20%7C%20Node%20%7C%20AI%20Engine-10201f)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Portfolio](https://img.shields.io/badge/portfolio-ready-14b8a6)](#)
+[![Repo](https://img.shields.io/badge/main%20repo-WayFinder--Labs-14b8a6)](https://github.com/PRRanavvv/WayFinder-Labs)
 
 </div>
 
-WayFinder is a public showcase repository for an AI travel planning platform that combines semantic itinerary generation, collaborative spatial planning, and adaptive preference memory.
+WayFinder-Labs is the main public repository for WayFinder from this point onward.
 
-This repository is intentionally curated for public review. It demonstrates the system architecture, product thinking, and selected implementation patterns without exposing private datasets, proprietary ranking heuristics, production credentials, or internal experimentation systems.
+WayFinder is an AI-powered group travel planning platform built around semantic itinerary generation, collaborative spatial planning, and adaptive preference intelligence. The public repo is structured to show the product architecture and safe demo logic while keeping private datasets, proprietary ranking heuristics, production prompts, and internal experiments out of scope.
 
 ---
 
-## Why WayFinder
+## Team Roles
 
-Most itinerary apps generate a static list of places. WayFinder is designed around a different idea:
+| Member | Role | Primary Ownership | Repo Boundary |
+| --- | --- | --- | --- |
+| Harsh | Frontend Architecture / Backend Infrastructure / System Integration Lead | Micro-frontend shell, shared frontend architecture, backend services, Prisma + PostgreSQL setup, auth, API gateway, deployment, monitoring, CI/CD | Owns frontend, backend, infrastructure, and system integration changes. |
+| Pranav | AI Systems / Product Intelligence Lead | AI architecture, recommendation schemas, travel metadata intelligence, structured prompting, retrieval, ranking, adaptive memory, optimization, validation | Adds public-safe AI/ML work only: `ai-engine/`, AI docs, schemas, safe demo data, scoring demos, and evaluation examples. |
+| Ayushman | Product / Website Designer | Website design, planning workspace UX, design system, landing experience, visual assets, Figma/spec handoff | Owns design direction and assets; implementation should be coordinated through frontend branches. |
+
+## Contribution Rule From Here Onward
+
+This repo remains the main team MVP repo, but Pranav-side additions should follow a strict AI/ML-only boundary.
+
+Allowed for Pranav's workstream:
+
+- AI system architecture docs
+- Recommendation schemas
+- Public-safe metadata examples
+- Structured generation and validation logic
+- Retrieval/ranking demos
+- Adaptive scoring examples
+- Evaluation scripts using safe or synthetic data
+
+Not allowed in the public repo:
+
+- Private Jaipur intelligence datasets
+- Production prompts or vendor orchestration internals
+- Proprietary scoring weights or ranking heuristics
+- Secrets, credentials, dumps, binaries, or private experiments
+
+## Product Aim
+
+Most itinerary apps generate static lists. WayFinder is designed around a different idea:
 
 > Travel planning should feel like co-designing a journey with an intelligent assistant.
 
-WayFinder turns trips into a visual planning workspace where activities can be arranged spatially, evaluated semantically, adapted to user behavior, and explained in human terms.
+WayFinder turns trip planning into a visual workspace where activities can be arranged, evaluated semantically, adapted to group behavior, and explained in human terms.
+
+## MVP Architecture
+
+```mermaid
+flowchart LR
+  User["Traveler / Group"] --> Website["Website + Product UX<br/>Ayushman"]
+  Website --> Shell["Micro-frontend Shell<br/>Harsh"]
+  Shell --> API["API Gateway + Backend Services<br/>Harsh"]
+  API --> AI["AI Planning Engine<br/>Pranav"]
+  AI --> Graph["Travel Intelligence Graph<br/>Pranav"]
+  AI --> Memory["Preference Memory<br/>Pranav"]
+  AI --> Validator["Validation + Guardrails<br/>Pranav"]
+  API --> Store["Persistence Layer<br/>Harsh"]
+  AI --> API
+```
+
+## AI/ML Pipeline
+
+```mermaid
+flowchart TD
+  Intent["Trip Intent"] --> Schema["Recommendation Schema"]
+  Schema --> Metadata["Curated Travel Metadata"]
+  Metadata --> Retrieval["Semantic Retrieval"]
+  Retrieval --> Ranking["Preference-aware Ranking"]
+  Ranking --> Optimization["Itinerary Optimization"]
+  Optimization --> Validation["Validation + Hallucination Checks"]
+  Validation --> Output["Structured Itinerary JSON"]
+  Output --> Feedback["User Interaction Signals"]
+  Feedback --> Memory["Adaptive Preference Profile"]
+  Memory --> Ranking
+```
 
 ## Product Highlights
 
@@ -38,90 +98,42 @@ WayFinder turns trips into a visual planning workspace where activities can be a
 ## Repository Structure
 
 ```text
-WayFinder-Travel-Platform/
-├── frontend/          # Public showcase React UI
-├── backend/           # Public-safe API shell
-├── ai-engine/         # Demonstration AI planning logic
-├── docs/              # Architecture and product docs
-├── assets/            # Screenshot and architecture placeholders
-├── .github/           # Issue and PR templates
-├── CONTRIBUTING.md
-├── SECURITY.md
-└── README.md
+WayFinder-Labs/
+|-- frontend/          # Public showcase React UI
+|-- backend/           # Public-safe API shell
+|-- ai-engine/         # Public-safe AI planning logic and demos
+|-- docs/              # Architecture, roadmap, and AI/ML documentation
+|-- assets/            # Screenshots, diagrams, and design assets
+|-- .github/           # Issue and PR templates
+|-- CONTRIBUTING.md
+|-- SECURITY.md
+`-- README.md
 ```
 
-## Architecture
+## Strict AI/ML Build Order
 
-WayFinder is organized as five public-facing layers:
+| Week | Main Focus | Pranav AI/ML Scope | Public-Safe Deliverable |
+| --- | --- | --- | --- |
+| Week 1 | Core System and Architecture Design | Finalize AI system architecture, recommendation schemas, curated travel metadata system, scoring parameter planning | AI architecture docs and schema plan |
+| Week 2 | Frontend-Backend Integration and AI Generation Layer | Build structured prompting pipeline, JSON output enforcement, itinerary generation logic, validation systems, prompt experimentation | Structured itinerary generation contract |
+| Week 3 | Interactive Visualization and Intelligence Layer | Build curated travel dataset, metadata tagging, travel intelligence categorization system | Safe sample metadata model |
+| Week 4 | Retrieval Infrastructure and Performance Layer | Set up embeddings pipeline, vector DB integration, semantic retrieval system, contextual retrieval testing | Retrieval architecture and demo flow |
+| Week 5 | Recommendation and Optimization Engine | Build recommendation ranking engine, budget scoring logic, travel efficiency optimization, preference balancing logic | Public-safe ranking and scoring demo |
+| Week 6 | AI Orchestration and Infrastructure Layer | Integrate retrieval + ranking + LLM orchestration pipeline, dynamic itinerary recalculation system, reasoning refinement | End-to-end AI planning pipeline demo |
+| Week 7 | Optimization and Reliability Layer | Add hallucination reduction system, itinerary optimization engine, recommendation validation pipeline, route balancing logic | Reliability and validation layer |
+| Week 8 | Production Launch Phase | AI tuning, dataset expansion, recommendation quality refinement, feedback-driven optimization | Launch-ready public AI/ML showcase |
 
-```text
-User Workspace
-  ↓
-Planning API
-  ↓
-AI Engine
-  ↓
-Semantic Place Graph
-  ↓
-Preference Memory
-```
+Full AI/ML implementation order: [docs/AIML_IMPLEMENTATION_ORDER.md](docs/AIML_IMPLEMENTATION_ORDER.md).
 
-The production platform contains deeper internal services, but this showcase keeps the public repo focused on safe architecture and demo logic.
+## Documentation
 
-Read more:
 - [System Design](docs/SYSTEM_DESIGN.md)
 - [AI Pipeline Flow](docs/AI_PIPELINE_FLOW.md)
 - [Ranking Engine](docs/RANKING_ENGINE.md)
 - [Itinerary Lifecycle](docs/ITINERARY_LIFECYCLE.md)
 - [Adaptive Memory Lifecycle](docs/ADAPTIVE_MEMORY_LIFECYCLE.md)
-
-## AI Planning Engine Overview
-
-The public AI engine demonstrates a simplified version of the WayFinder planning loop:
-
-1. Normalize trip intent
-2. Retrieve candidate places from a safe sample set
-3. Score places with semantic and adaptive signals
-4. Build day-level itinerary lanes
-5. Return structured activities with explanations
-
-This repo uses intentionally simple scoring weights. The production platform uses richer internal heuristics, evaluation traces, and private place intelligence.
-
-## Semantic Ranking System
-
-The demo ranker evaluates candidates across:
-
-- Semantic fit to trip interests
-- Adaptive fit to learned preference profile
-- Pacing fit based on fatigue tolerance
-- Cluster fit for smoother travel zones
-- Weather fit for practical resilience
-
-See [Ranking Engine](docs/RANKING_ENGINE.md).
-
-## Adaptive Preference Memory
-
-WayFinder learns from behavior signals such as:
-
-- Activity pinned
-- Activity replaced
-- High-fatigue activity removed
-- Recovery stop added
-- Food or heritage preference reinforced
-
-Those signals update a normalized profile that can influence future recommendations.
-
-See [Adaptive Memory Lifecycle](docs/ADAPTIVE_MEMORY_LIFECYCLE.md).
-
-## Screenshots
-
-Public screenshots can be added under `assets/screenshots/`.
-
-Suggested images:
-
-| Canvas Workspace | AI Copilot | Adaptive Memory |
-| --- | --- | --- |
-| `assets/screenshots/canvas.png` | `assets/screenshots/copilot.png` | `assets/screenshots/memory.png` |
+- [AIML Implementation Order](docs/AIML_IMPLEMENTATION_ORDER.md)
+- [Public Repository Scope](docs/PUBLIC_REPO_SCOPE.md)
 
 ## Tech Stack
 
@@ -129,15 +141,15 @@ Suggested images:
 | --- | --- |
 | Frontend | React, Vite, CSS |
 | Backend | Node.js, Express |
-| AI Engine | JavaScript modules, semantic scoring demo |
-| Architecture | Modular frontend/backend/AI separation |
-| Documentation | Markdown system design and lifecycle docs |
+| AI Engine | JavaScript modules, semantic scoring demo, structured JSON contracts |
+| Data Layer | Public-safe sample data, private production data excluded |
+| Documentation | Markdown, Mermaid architecture diagrams |
 
 ## Local Setup
 
 ```bash
-git clone https://github.com/PRRanavvv/WayFinder-Travel-Platform.git
-cd WayFinder-Travel-Platform
+git clone https://github.com/PRRanavvv/WayFinder-Labs.git
+cd WayFinder-Labs
 npm install
 ```
 
@@ -159,15 +171,6 @@ Run AI engine demo:
 npm run demo:ai
 ```
 
-## Roadmap
-
-- Add public screenshots and product walkthrough GIFs
-- Add hosted demo link
-- Add richer public test harness
-- Add safe mock collaboration flow
-- Add OpenAPI docs for the showcase backend
-- Add lightweight design system documentation
-
 ## Public Scope
 
 This repository does not include:
@@ -183,11 +186,10 @@ See [Public Repository Scope](docs/PUBLIC_REPO_SCOPE.md).
 
 ## Contributing
 
-This is a showcase repository, but contributions to docs, demo UX, safe examples, and issue quality are welcome.
+This is now the main public MVP repo for the WayFinder team. Contributions should stay aligned with the ownership boundaries above.
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Author
+## Team
 
-Built by [PRRanavvv](https://github.com/PRRanavvv) as a portfolio-ready AI product engineering project.
-
+Built by the WayFinder team: Harsh, Pranav, and Ayushman.

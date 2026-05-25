@@ -4,7 +4,7 @@ Profile: <https://github.com/PRRanavvv>
 
 ## Suggested Pinned Repositories
 
-1. `WayFinder-Travel-Platform`
+1. `WayFinder-Labs`
    - AI travel planning platform showcase
    - Demonstrates product thinking, AI architecture, frontend polish, backend structure
 
@@ -43,4 +43,3 @@ Use this repo as the main pinned portfolio project. It should communicate:
 - You understand AI product workflows
 - You can curate public code safely
 - You can document engineering decisions clearly
-
