@@ -8,10 +8,15 @@ const defaultWeights = {
   weatherFit: 0.08
 };
 
-export function rankPlaces({ interests = [], preferenceProfile = {}, weights = defaultWeights } = {}) {
+export function rankPlaces({
+  interests = [],
+  preferenceProfile = {},
+  weights = defaultWeights,
+  places = demoPlaces
+} = {}) {
   const normalizedInterests = interests.map(normalize);
 
-  return demoPlaces
+  return places
     .map((place) => {
       const breakdown = {
         semanticFit: semanticFit(place, normalizedInterests),
@@ -77,4 +82,3 @@ function explainScore(place, breakdown) {
 
 const normalize = (value) => String(value || "").trim().toLowerCase();
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-

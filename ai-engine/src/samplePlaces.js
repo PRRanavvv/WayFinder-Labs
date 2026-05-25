@@ -6,6 +6,10 @@ export const demoPlaces = [
     role: "anchor",
     cluster: "Walled City",
     tags: ["heritage", "culture", "photography"],
+    summary: "A high-context heritage stop for travelers who want cultural depth and strong visual moments.",
+    bestFor: ["first-time visitors", "cultural explorers", "photography plans"],
+    dayWindows: ["morning", "late afternoon"],
+    retrievalTerms: ["fort", "palace", "history", "architecture", "old city"],
     fatigue: 0.62,
     clusterPriority: 88,
     weatherFit: 76
@@ -17,6 +21,10 @@ export const demoPlaces = [
     role: "recovery",
     cluster: "Central District",
     tags: ["food", "local", "recovery"],
+    summary: "A practical food break that helps rebalance the itinerary after denser sightseeing.",
+    bestFor: ["food explorers", "low-energy groups", "midday reset"],
+    dayWindows: ["lunch", "evening"],
+    retrievalTerms: ["street food", "local food", "snacks", "meal break", "rest stop"],
     fatigue: 0.18,
     clusterPriority: 82,
     weatherFit: 92
@@ -28,6 +36,10 @@ export const demoPlaces = [
     role: "visual",
     cluster: "North Ridge",
     tags: ["photography", "sunset", "scenic"],
+    summary: "A scenic viewpoint suited for golden-hour photos and slower visual exploration.",
+    bestFor: ["photographers", "couples", "sunset plans"],
+    dayWindows: ["late afternoon", "sunset"],
+    retrievalTerms: ["viewpoint", "skyline", "golden hour", "landscape", "photo spot"],
     fatigue: 0.55,
     clusterPriority: 74,
     weatherFit: 68
@@ -39,6 +51,10 @@ export const demoPlaces = [
     role: "exploration",
     cluster: "Old Quarter",
     tags: ["shopping", "craft", "culture"],
+    summary: "A market walk for craft discovery, local texture, and flexible browsing time.",
+    bestFor: ["shoppers", "cultural explorers", "budget groups"],
+    dayWindows: ["afternoon", "evening"],
+    retrievalTerms: ["bazaar", "handicraft", "market", "souvenirs", "local walk"],
     fatigue: 0.48,
     clusterPriority: 79,
     weatherFit: 72
@@ -50,6 +66,10 @@ export const demoPlaces = [
     role: "recovery",
     cluster: "Cafe District",
     tags: ["cafe", "food", "low fatigue"],
+    summary: "A low-fatigue cafe reset for slower pacing, conversation, and itinerary recovery.",
+    bestFor: ["remote workers", "low-energy families", "slow travelers"],
+    dayWindows: ["morning", "afternoon"],
+    retrievalTerms: ["coffee", "cafe", "quiet", "rest", "low energy"],
     fatigue: 0.12,
     clusterPriority: 84,
     weatherFit: 96
@@ -61,9 +81,12 @@ export const demoPlaces = [
     role: "filler",
     cluster: "Central District",
     tags: ["culture", "indoor", "visual"],
+    summary: "A flexible indoor cultural stop that works well as a weather-safe filler activity.",
+    bestFor: ["art curious travelers", "rainy-day plans", "visual explorers"],
+    dayWindows: ["afternoon", "early evening"],
+    retrievalTerms: ["gallery", "art", "indoor", "museum", "creative stop"],
     fatigue: 0.28,
     clusterPriority: 83,
     weatherFit: 94
   }
 ];
-

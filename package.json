@@ -12,6 +12,8 @@
     "dev": "npm run dev --workspace frontend",
     "dev:api": "npm run dev --workspace backend",
     "demo:ai": "npm run demo --workspace ai-engine",
+    "demo:retrieval": "npm run demo:retrieval --workspace ai-engine",
+    "test:retrieval": "npm run test:retrieval --workspace ai-engine",
     "lint": "npm run lint --workspace frontend",
     "format:check": "prettier --check ."
   },

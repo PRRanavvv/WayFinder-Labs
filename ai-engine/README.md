@@ -4,6 +4,8 @@ This public module demonstrates the shape of the WayFinder planning engine witho
 
 Included:
 - Sample semantic ranker
+- Public-safe retrieval index
+- Embeddings-ready sample metadata
 - Simple preference memory update loop
 - Demo itinerary lifecycle
 - Non-sensitive sample places
@@ -21,3 +23,8 @@ Run the demo:
 npm run demo --workspace ai-engine
 ```
 
+Run the retrieval demo:
+
+```bash
+npm run demo:retrieval --workspace ai-engine
+```

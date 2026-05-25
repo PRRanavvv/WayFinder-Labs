@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "demo": "node examples/demo.js"
+    "demo": "node examples/demo.js",
+    "demo:retrieval": "node examples/retrievalDemo.js",
+    "test:retrieval": "node tests/retrieval.test.js"
   }
 }
-

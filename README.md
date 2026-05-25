@@ -36,6 +36,7 @@ Allowed for Pranav's workstream:
 - Public-safe metadata examples
 - Structured generation and validation logic
 - Retrieval/ranking demos
+- Embeddings-ready public metadata
 - Adaptive scoring examples
 - Evaluation scripts using safe or synthetic data
 
@@ -76,7 +77,8 @@ flowchart TD
   Intent["Trip Intent"] --> Schema["Recommendation Schema"]
   Schema --> Metadata["Curated Travel Metadata"]
   Metadata --> Retrieval["Semantic Retrieval"]
-  Retrieval --> Ranking["Preference-aware Ranking"]
+  Retrieval --> Candidates["Retrieved Candidate Set"]
+  Candidates --> Ranking["Preference-aware Ranking"]
   Ranking --> Optimization["Itinerary Optimization"]
   Optimization --> Validation["Validation + Hallucination Checks"]
   Validation --> Output["Structured Itinerary JSON"]
@@ -129,6 +131,7 @@ Full AI/ML implementation order: [docs/AIML_IMPLEMENTATION_ORDER.md](docs/AIML_I
 
 - [System Design](docs/SYSTEM_DESIGN.md)
 - [AI Pipeline Flow](docs/AI_PIPELINE_FLOW.md)
+- [Retrieval Layer](docs/RETRIEVAL_LAYER.md)
 - [Ranking Engine](docs/RANKING_ENGINE.md)
 - [Itinerary Lifecycle](docs/ITINERARY_LIFECYCLE.md)
 - [Adaptive Memory Lifecycle](docs/ADAPTIVE_MEMORY_LIFECYCLE.md)
@@ -169,6 +172,18 @@ Run AI engine demo:
 
 ```bash
 npm run demo:ai
+```
+
+Run retrieval demo:
+
+```bash
+npm run demo:retrieval
+```
+
+Run retrieval checks:
+
+```bash
+npm run test:retrieval
 ```
 
 ## Public Scope
