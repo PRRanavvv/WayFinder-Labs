@@ -17,6 +17,6 @@ await fs.writeFile(
 
 console.log(JSON.stringify({
   status: "ok",
-  outputPath,
+  outputPath
   recordCount: records.length
 }, null, 2));
