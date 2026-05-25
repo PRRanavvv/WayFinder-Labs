@@ -131,6 +131,9 @@ Full AI/ML implementation order: [docs/AIML_IMPLEMENTATION_ORDER.md](docs/AIML_I
 
 - [System Design](docs/SYSTEM_DESIGN.md)
 - [AI Pipeline Flow](docs/AI_PIPELINE_FLOW.md)
+- [Vector DB Selection](docs/VECTOR_DB_SELECTION.md)
+- [Embedding Pipeline](docs/EMBEDDING_PIPELINE.md)
+- [Chunking Strategy](docs/CHUNKING_STRATEGY.md)
 - [Retrieval Layer](docs/RETRIEVAL_LAYER.md)
 - [Ranking Engine](docs/RANKING_ENGINE.md)
 - [Itinerary Lifecycle](docs/ITINERARY_LIFECYCLE.md)
@@ -184,6 +187,12 @@ Run retrieval checks:
 
 ```bash
 npm run test:retrieval
+```
+
+Run retrieval benchmark:
+
+```bash
+npm run benchmark:retrieval
 ```
 
 ## Public Scope

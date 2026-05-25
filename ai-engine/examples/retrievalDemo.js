@@ -1,4 +1,10 @@
-import { buildItinerary, rankPlaces, retrievePlaces, updatePreferenceProfile } from "../src/index.js";
+import {
+  buildItinerary,
+  createLocalRetrievalPipeline,
+  rankPlaces,
+  updatePreferenceProfile
+} from "../src/index.js";
+import { demoPlaces } from "../src/samplePlaces.js";
 
 const tripIntent = {
   query: "slow Jaipur trip with heritage, local food, photography, and recovery breaks",
@@ -30,25 +36,32 @@ const profile = updatePreferenceProfile(
   }
 );
 
-const retrievedPlaces = retrievePlaces({
+const pipeline = await createLocalRetrievalPipeline();
+await pipeline.indexPlaces();
+
+const retrievedContext = await pipeline.retrieveContext({
   ...tripIntent,
   topK: 5
 });
 
+const candidatePlaceIds = new Set(retrievedContext.map((record) => record.sourceId));
+const candidatePlaces = demoPlaces.filter((place) => candidatePlaceIds.has(place.id));
+
 const rankedPlaces = rankPlaces({
   interests: tripIntent.interests,
   preferenceProfile: profile,
-  places: retrievedPlaces
+  places: candidatePlaces
 });
 
 console.log(JSON.stringify({
   intent: tripIntent,
-  retrievedPlaces: retrievedPlaces.map((place) => ({
-    id: place.id,
-    name: place.name,
-    retrievalScore: place.retrievalScore,
-    retrievalBreakdown: place.retrievalBreakdown,
-    retrievalReason: place.retrievalReason
+  retrievedContext: retrievedContext.map((record) => ({
+    id: record.id,
+    sourceId: record.sourceId,
+    title: record.title,
+    retrievalScore: record.retrievalScore,
+    retrievalConfidence: record.retrievalConfidence,
+    retrievalReason: record.retrievalReason
   })),
   itinerary: buildItinerary({ rankedPlaces, days: 2 })
 }, null, 2));

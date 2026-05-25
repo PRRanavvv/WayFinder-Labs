@@ -6,6 +6,9 @@ Included:
 - Sample semantic ranker
 - Public-safe retrieval index
 - Embeddings-ready sample metadata
+- Metadata-aware chunking pipeline
+- Local vector store and pgvector adapter
+- Retrieval benchmark scripts
 - Simple preference memory update loop
 - Demo itinerary lifecycle
 - Non-sensitive sample places
@@ -27,4 +30,10 @@ Run the retrieval demo:
 
 ```bash
 npm run demo:retrieval --workspace ai-engine
+```
+
+Run retrieval benchmarks:
+
+```bash
+npm run benchmark:retrieval --workspace ai-engine
 ```

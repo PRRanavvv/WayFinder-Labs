@@ -2,15 +2,16 @@
 
 The Week 4 AI/ML milestone turns public-safe place metadata into a retrieval-ready system.
 
-This repo uses a lightweight local retrieval index so the architecture is easy to read and run without external services. Production vector storage, private embeddings, proprietary place intelligence, and vendor-specific orchestration are intentionally excluded.
+This repo now contains a production-facing retrieval foundation with a runnable local store and a pgvector adapter. The local store keeps public tests and demos secret-free. The pgvector path is the selected production architecture for the MVP phase.
 
 ## Public Retrieval Flow
 
 ```mermaid
 flowchart TD
   Intent["Trip Intent"] --> Query["Query Text Builder"]
-  Metadata["Public-safe Place Metadata"] --> Text["Embedding Text Builder"]
-  Text --> Index["Local Vector-style Index"]
+  Metadata["Public-safe Place Metadata"] --> Chunker["Metadata-aware Chunker"]
+  Chunker --> Embed["Embedding Service"]
+  Embed --> Index["Vector Store<br/>local demo or pgvector"]
   Query --> Search["Semantic Retrieval"]
   Index --> Search
   Search --> Context["Contextual Fit Scoring"]
@@ -47,8 +48,15 @@ The ranker can then score only the retrieved candidate set instead of the full p
 Current files:
 
 - `ai-engine/src/retrievalIndex.js`
+- `ai-engine/src/retrieval/chunking.js`
+- `ai-engine/src/retrieval/embeddingService.js`
+- `ai-engine/src/retrieval/localVectorStore.js`
+- `ai-engine/src/retrieval/pgvectorStore.js`
+- `ai-engine/src/retrieval/retrievalPipeline.js`
+- `ai-engine/src/retrieval/retrievalBenchmark.js`
 - `ai-engine/examples/retrievalDemo.js`
 - `ai-engine/src/samplePlaces.js`
+- `ai-engine/database/pgvector-schema.sql`
 
 Run the demo:
 
@@ -62,13 +70,25 @@ Run contextual retrieval checks:
 npm run test:retrieval
 ```
 
+Run retrieval benchmarks:
+
+```bash
+npm run benchmark:retrieval
+```
+
+Run a local reindex:
+
+```bash
+npm run reindex:retrieval
+```
+
 ## Production Boundary
 
 The public demo does not include:
 
 - Private Jaipur place intelligence
 - Real embedding provider calls
-- Production vector DB credentials or schemas
+- Production vector DB credentials
 - Proprietary retrieval tuning rules
 - Internal evaluation traces
 - Vendor prompt or orchestration internals
