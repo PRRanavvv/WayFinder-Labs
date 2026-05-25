@@ -21,8 +21,10 @@ flowchart TD
   Retrieval --> Candidates["Candidate Set"]
   Candidates --> Ranking["Deterministic Ranking Engine"]
   Ranking --> Logs["Decision Logs"]
-  Ranking --> Next["Future Optimization Layer"]
-  Next --> Generation["Structured Generation Layer"]
+  Ranking --> Constraints["Constraint Engine"]
+  Constraints --> Optimization["Optimization Engine"]
+  Optimization --> Explain["Explanation Engine"]
+  Explain --> Generation["Structured Generation Layer"]
 ```
 
 ## Ranking Dimensions
@@ -77,9 +79,9 @@ npm run test:intelligence
 
 ## Next Priority 2 Steps
 
-1. Budget + preference scoring refinement
-2. Timing optimization
-3. Route optimization
+1. Route sequencing refinement
+2. Adaptive recalculation
+3. Optimization benchmarking expansion
 4. Final structured itinerary generation
 
-The current implementation intentionally stops before optimization so the ranking layer can be validated independently.
+The current implementation now includes deterministic optimization and decision-quality evaluation, while still keeping final LLM generation downstream.

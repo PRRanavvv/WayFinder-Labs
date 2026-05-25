@@ -21,8 +21,8 @@ This roadmap records the team direction while keeping implementation ownership c
 | Week 3 | Intelligence Layer | Safe travel metadata model, tagging taxonomy, public-safe categorization examples |
 | Week 4 | Retrieval Layer | pgvector selection, embeddings pipeline, chunking strategy, retrieval benchmark flow |
 | Week 5 | Recommendation Engine | Deterministic ranking engine, budget/preference scoring hooks, decision logs, retrieval-to-ranking flow |
-| Week 6 | Orchestration Layer | Retrieval + ranking + LLM orchestration plan, dynamic recalculation flow, reasoning refinement |
-| Week 7 | Reliability Layer | Hallucination reduction, itinerary optimization, recommendation validation, route balancing |
+| Week 6 | Orchestration Layer | Retrieval + ranking + constraint orchestration, dynamic recalculation flow, reasoning refinement |
+| Week 7 | Reliability Layer | Constraint validation, itinerary optimization, decision traces, quality metrics |
 | Week 8 | Launch Refinement | AI tuning, safe dataset expansion, quality refinement, feedback-driven optimization |
 
 ## Public Release Priorities

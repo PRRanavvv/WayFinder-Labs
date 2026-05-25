@@ -136,6 +136,8 @@ Full AI/ML implementation order: [docs/AIML_IMPLEMENTATION_ORDER.md](docs/AIML_I
 - [Chunking Strategy](docs/CHUNKING_STRATEGY.md)
 - [Retrieval Layer](docs/RETRIEVAL_LAYER.md)
 - [Intelligence Flow Engine](docs/INTELLIGENCE_FLOW_ENGINE.md)
+- [Decision Quality Layer](docs/DECISION_QUALITY_LAYER.md)
+- [Hybrid Intelligence Architecture](docs/HYBRID_INTELLIGENCE_ARCHITECTURE.md)
 - [Ranking Engine](docs/RANKING_ENGINE.md)
 - [Itinerary Lifecycle](docs/ITINERARY_LIFECYCLE.md)
 - [Adaptive Memory Lifecycle](docs/ADAPTIVE_MEMORY_LIFECYCLE.md)
@@ -206,6 +208,18 @@ Run intelligence checks:
 
 ```bash
 npm run test:intelligence
+```
+
+Run decision-quality optimization demo:
+
+```bash
+npm run demo:decision-quality
+```
+
+Run decision-quality checks:
+
+```bash
+npm run test:decision-quality
 ```
 
 ## Public Scope

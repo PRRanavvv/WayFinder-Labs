@@ -11,6 +11,9 @@ Included:
 - Retrieval benchmark scripts
 - Deterministic decision ranking engine
 - Retrieval-to-ranking intelligence flow
+- Constraint-based optimization layer
+- Recommendation explanation engine
+- Decision quality evaluation metrics
 - Decision logs for explainability and debugging
 - Simple preference memory update loop
 - Demo itinerary lifecycle
@@ -45,4 +48,10 @@ Run intelligence flow:
 
 ```bash
 npm run demo:intelligence --workspace ai-engine
+```
+
+Run decision-quality optimization:
+
+```bash
+npm run demo:decision-quality --workspace ai-engine
 ```

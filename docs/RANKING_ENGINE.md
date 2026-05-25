@@ -19,6 +19,17 @@ Retrieval is responsible for finding candidate context. Ranking is responsible f
 | `weatherCompatibility` | Prefer indoor/outdoor fit under weather constraints |
 | `diversityFit` | Protect itinerary variety |
 
+## Scoring Profiles
+
+The scoring system supports configurable profiles:
+
+| Profile | Purpose |
+| --- | --- |
+| `balanced` | General-purpose travel recommendation scoring |
+| `budgetSensitive` | Gives more weight to budget fit |
+| `slowTravel` | Gives more weight to pacing, preference fit, and efficiency |
+| `weatherSafe` | Gives more weight to indoor/outdoor resilience |
+
 ## Why This Matters
 
 This layer matters more than the LLM for recommendation quality. It makes ranking:

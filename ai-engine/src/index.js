@@ -20,7 +20,28 @@ import {
   defaultDecisionWeights,
   rankCandidates
 } from "./intelligence/rankingEngine.js";
-import { runIntelligenceFlow } from "./intelligence/intelligencePipeline.js";
+import {
+  runDecisionQualityFlow,
+  runIntelligenceFlow
+} from "./intelligence/intelligencePipeline.js";
+import {
+  createScoringConfig,
+  defaultScoringWeights,
+  normalizeWeights,
+  scoringDimensions,
+  scoringProfiles
+} from "./intelligence/scoringConfig.js";
+import { scoreTravelCandidate } from "./intelligence/scoringEngine.js";
+import {
+  applyCandidateToDayState,
+  createEmptyDayState,
+  defaultConstraintConfig,
+  evaluateCandidateConstraints,
+  validateOptimizedItinerary
+} from "./intelligence/constraintEngine.js";
+import { buildDecisionTrace, explainOptimizedActivity } from "./intelligence/explanationEngine.js";
+import { optimizeItinerary } from "./intelligence/optimizationEngine.js";
+import { evaluateDecisionQuality } from "./intelligence/evaluationMetrics.js";
 
 export {
   buildEmbeddingText,
@@ -31,16 +52,32 @@ export {
   buildTravelMetadataChunks,
   createEmbeddingService,
   createDecisionLog,
+  createScoringConfig,
+  createEmptyDayState,
   createLocalRetrievalPipeline,
+  defaultConstraintConfig,
   defaultDecisionWeights,
+  defaultScoringWeights,
   defaultRetrievalBenchmarkCases,
+  applyCandidateToDayState,
+  buildDecisionTrace,
   LocalVectorStore,
+  normalizeWeights,
+  optimizeItinerary,
   PgvectorStore,
   rankPlaces,
   rankCandidates,
+  runDecisionQualityFlow,
   runIntelligenceFlow,
   runRetrievalBenchmark,
+  evaluateCandidateConstraints,
+  evaluateDecisionQuality,
+  explainOptimizedActivity,
   retrievePlaces,
+  scoreTravelCandidate,
+  scoringDimensions,
+  scoringProfiles,
   updatePreferenceProfile,
+  validateOptimizedItinerary,
   validateChunks
 };
