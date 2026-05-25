@@ -135,6 +135,7 @@ Full AI/ML implementation order: [docs/AIML_IMPLEMENTATION_ORDER.md](docs/AIML_I
 - [Embedding Pipeline](docs/EMBEDDING_PIPELINE.md)
 - [Chunking Strategy](docs/CHUNKING_STRATEGY.md)
 - [Retrieval Layer](docs/RETRIEVAL_LAYER.md)
+- [Intelligence Flow Engine](docs/INTELLIGENCE_FLOW_ENGINE.md)
 - [Ranking Engine](docs/RANKING_ENGINE.md)
 - [Itinerary Lifecycle](docs/ITINERARY_LIFECYCLE.md)
 - [Adaptive Memory Lifecycle](docs/ADAPTIVE_MEMORY_LIFECYCLE.md)
@@ -193,6 +194,18 @@ Run retrieval benchmark:
 
 ```bash
 npm run benchmark:retrieval
+```
+
+Run intelligence flow demo:
+
+```bash
+npm run demo:intelligence
+```
+
+Run intelligence checks:
+
+```bash
+npm run test:intelligence
 ```
 
 ## Public Scope

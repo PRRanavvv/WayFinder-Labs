@@ -15,6 +15,12 @@ import {
   defaultRetrievalBenchmarkCases,
   runRetrievalBenchmark
 } from "./retrieval/retrievalBenchmark.js";
+import { createDecisionLog } from "./intelligence/decisionLogger.js";
+import {
+  defaultDecisionWeights,
+  rankCandidates
+} from "./intelligence/rankingEngine.js";
+import { runIntelligenceFlow } from "./intelligence/intelligencePipeline.js";
 
 export {
   buildEmbeddingText,
@@ -24,11 +30,15 @@ export {
   buildRetrievalRecords,
   buildTravelMetadataChunks,
   createEmbeddingService,
+  createDecisionLog,
   createLocalRetrievalPipeline,
+  defaultDecisionWeights,
   defaultRetrievalBenchmarkCases,
   LocalVectorStore,
   PgvectorStore,
   rankPlaces,
+  rankCandidates,
+  runIntelligenceFlow,
   runRetrievalBenchmark,
   retrievePlaces,
   updatePreferenceProfile,

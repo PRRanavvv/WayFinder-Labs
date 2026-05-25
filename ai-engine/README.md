@@ -9,6 +9,9 @@ Included:
 - Metadata-aware chunking pipeline
 - Local vector store and pgvector adapter
 - Retrieval benchmark scripts
+- Deterministic decision ranking engine
+- Retrieval-to-ranking intelligence flow
+- Decision logs for explainability and debugging
 - Simple preference memory update loop
 - Demo itinerary lifecycle
 - Non-sensitive sample places
@@ -36,4 +39,10 @@ Run retrieval benchmarks:
 
 ```bash
 npm run benchmark:retrieval --workspace ai-engine
+```
+
+Run intelligence flow:
+
+```bash
+npm run demo:intelligence --workspace ai-engine
 ```

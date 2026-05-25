@@ -6,10 +6,12 @@
   "scripts": {
     "demo": "node examples/demo.js",
     "demo:retrieval": "node examples/retrievalDemo.js",
+    "demo:intelligence": "node examples/intelligenceFlowDemo.js",
     "ingest:retrieval": "node scripts/ingestRetrieval.js",
     "reindex:retrieval": "node scripts/reindexRetrieval.js",
     "benchmark:retrieval": "node scripts/benchmarkRetrieval.js",
-    "test:retrieval": "node tests/retrieval.test.js"
+    "test:retrieval": "node tests/retrieval.test.js",
+    "test:intelligence": "node tests/intelligenceFlow.test.js"
   },
   "optionalDependencies": {
     "pg": "^8.13.1"

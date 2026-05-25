@@ -1,28 +1,35 @@
 # Ranking Engine Explanation
 
-The ranking engine in this public repo demonstrates composable scoring, not production ranking.
+The ranking engine is the first real decision layer in WayFinder.
 
-## Public Demo Dimensions
+Retrieval is responsible for finding candidate context. Ranking is responsible for deciding which candidates deserve priority. This separation keeps the LLM out of deterministic scoring, budget math, timing checks, and recommendation ordering.
+
+## Current Public Dimensions
 
 | Dimension | Purpose |
 | --- | --- |
-| `semanticFit` | Match place tags against trip interests |
-| `adaptiveFit` | Adjust based on learned user preferences |
-| `pacingFit` | Penalize places that exceed fatigue tolerance |
-| `clusterFit` | Favor smoother locality continuity |
-| `weatherFit` | Prefer resilient places under weather uncertainty |
+| `semanticRelevance` | Match candidate metadata against trip interests |
+| `retrievalConfidence` | Use retrieval score as a candidate-quality signal |
+| `travelEfficiency` | Favor smoother clusters and lower travel-time friction |
+| `popularity` | Include public-safe demand/recognition signal |
+| `budgetFit` | Compare activity cost against available daily budget |
+| `timingFit` | Check requested day window against opening/planning windows |
+| `preferenceFit` | Apply learned preference profile signals |
+| `groupCompatibility` | Match solo/couple/friends/family group context |
+| `weatherCompatibility` | Prefer indoor/outdoor fit under weather constraints |
+| `diversityFit` | Protect itinerary variety |
 
-## Why Composable Scoring
+## Why This Matters
 
-Each scoring dimension is independent. That makes the system easier to:
+This layer matters more than the LLM for recommendation quality. It makes ranking:
 
-- debug
-- explain
-- test
-- tune
-- extend with future modules
+- deterministic
+- explainable
+- testable
+- debuggable
+- tunable
+- safe to optimize later
 
 ## Public Safety Note
 
-The weights and sample data here are intentionally illustrative. Production ranking heuristics, internal evaluation signals, and proprietary datasets are not included.
-
+The implementation uses public-safe sample weights and metadata. Production ranking weights, private evaluation signals, private datasets, and proprietary optimization heuristics are not included.
