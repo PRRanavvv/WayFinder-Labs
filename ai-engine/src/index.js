@@ -42,6 +42,16 @@ import {
 import { buildDecisionTrace, explainOptimizedActivity } from "./intelligence/explanationEngine.js";
 import { optimizeItinerary } from "./intelligence/optimizationEngine.js";
 import { evaluateDecisionQuality } from "./intelligence/evaluationMetrics.js";
+export {
+  default as globalDestinationPlaceIntelligence,
+  destinationProfiles as globalDestinationProfiles
+} from "./datasets/globalDestinationDataset.js";
+export {
+  destinationProfiles as globalDestinationVisualProfiles,
+  getDestinationImage,
+  getDestinationProfile,
+  getStaticMapImage
+} from "./datasets/destinationVisualAssets.js";
 
 export {
   buildEmbeddingText,
