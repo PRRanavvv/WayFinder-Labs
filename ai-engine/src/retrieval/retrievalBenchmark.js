@@ -74,7 +74,9 @@ export async function runRetrievalBenchmark({
         sourceId: result.sourceId,
         title: result.title,
         score: result.retrievalScore,
-        confidence: result.retrievalConfidence
+        confidence: result.retrievalConfidence,
+        reasons: result.retrievalReasons || [],
+        breakdown: result.retrievalBreakdown
       })),
       failure: hits < minimumHits
     });

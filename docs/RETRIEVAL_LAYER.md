@@ -14,7 +14,7 @@ flowchart TD
   Embed --> Index["Vector Store<br/>local demo or Qdrant"]
   Query --> Search["Semantic Retrieval"]
   Index --> Search
-  Search --> Context["Contextual Fit Scoring"]
+  Search --> Context["Hybrid Scoring<br/>semantic + metadata + keyword"]
   Context --> Candidates["Retrieved Candidate Places"]
   Candidates --> Ranking["Preference-aware Ranking"]
   Ranking --> Itinerary["Structured Itinerary Output"]
@@ -41,7 +41,9 @@ Each retrieved place includes:
 
 - `retrievalScore`
 - `retrievalBreakdown.semanticScore`
-- `retrievalBreakdown.contextScore`
+- `retrievalBreakdown.metadataScore`
+- `retrievalBreakdown.keywordScore`
+- `retrievalReasons`
 - `retrievalReason`
 
 The ranker can then score only the retrieved candidate set instead of the full place list.
@@ -53,6 +55,7 @@ Current files:
 - `ai-engine/src/retrievalIndex.js`
 - `ai-engine/src/retrieval/chunking.js`
 - `ai-engine/src/retrieval/embeddingService.js`
+- `ai-engine/src/retrieval/hybridScoring.js`
 - `ai-engine/src/retrieval/localVectorStore.js`
 - `ai-engine/src/retrieval/qdrantStore.js`
 - `ai-engine/src/retrieval/retrievalPipeline.js`
@@ -93,6 +96,8 @@ QDRANT_URL=http://localhost:6333 npm run qdrant:index
 ```
 
 The benchmark prompt set contains 100 retrieval prompts across romantic trips, family vacations, budget backpacking, hidden gems, nature-focused travel, adventure trips, beach intent, nightlife, heritage, low-energy plans, food/market walks, wildlife, solo wellness, premium couples trips, weekend city breaks, and winter travel.
+
+The latest local benchmark target is above 90% minimum-hit pass rate on the 100-prompt set.
 
 ## Production Boundary
 

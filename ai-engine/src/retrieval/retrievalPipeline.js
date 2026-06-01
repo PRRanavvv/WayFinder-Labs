@@ -2,6 +2,11 @@ import { demoPlaces } from "../samplePlaces.js";
 import { enrichedTravelPlaces } from "../datasets/enrichedPlaces.js";
 import { buildTravelMetadataChunks, validateChunks } from "./chunking.js";
 import { createEmbeddingService } from "./embeddingService.js";
+import {
+  defaultHybridRetrievalWeights,
+  explainHybridMatch,
+  scoreHybridRecord
+} from "./hybridScoring.js";
 import { LocalVectorStore } from "./localVectorStore.js";
 import { QdrantStore } from "./qdrantStore.js";
 
@@ -34,7 +39,8 @@ export async function createLocalRetrievalPipeline({
   places = demoPlaces,
   destination = "Jaipur",
   embeddingService = createEmbeddingService(),
-  store = new LocalVectorStore()
+  store = new LocalVectorStore(),
+  hybridWeights = defaultHybridRetrievalWeights
 } = {}) {
   async function indexPlaces({ clear = true } = {}) {
     if (clear) await store.clear();
@@ -54,33 +60,45 @@ export async function createLocalRetrievalPipeline({
     constraints = {},
     filters = {},
     topK = 5,
-    minScore = 0
+    minScore = 0,
+    candidatePoolSize = Math.max(topK * 10, 60)
   } = {}) {
     const queryText = buildRetrievalQueryText({ query, interests, constraints });
-    const embedding = await embeddingService.embedText(queryText);
+    const embedding = await embeddingService.embedText(queryText, { inputType: "query" });
     const resolvedFilters = {
-      destination,
-      tags: interests,
+      ...(destination ? { destination } : {}),
       ...filters
     };
 
     const results = await store.search({
       embedding,
       filters: resolvedFilters,
-      topK,
+      topK: candidatePoolSize,
       minScore
     });
 
-    return results.map((record) => ({
-      ...record,
-      retrievalScore: Number((record.similarity * 100).toFixed(2)),
-      retrievalConfidence: record.confidence,
-      retrievalReason: explainContextMatch(record)
-    }));
+    return results
+      .map((record) => scoreHybridRecord({
+        record,
+        query,
+        queryText,
+        interests,
+        constraints,
+        weights: hybridWeights
+      }))
+      .sort((a, b) => b.hybridScore - a.hybridScore)
+      .slice(0, topK)
+      .map((record) => ({
+        ...record,
+        retrievalScore: Number((record.hybridScore * 100).toFixed(2)),
+        retrievalConfidence: confidenceFromScore(record.hybridScore),
+        retrievalReason: explainContextMatch(record)
+      }));
   }
 
   return {
     store,
+    embeddingService,
     indexPlaces,
     retrieveContext
   };
@@ -90,13 +108,15 @@ export async function createWayfinderRetrievalPipeline({
   places = enrichedTravelPlaces,
   destination = null,
   embeddingService = createEmbeddingService(),
-  store = new LocalVectorStore()
+  store = new LocalVectorStore(),
+  hybridWeights = defaultHybridRetrievalWeights
 } = {}) {
   return createLocalRetrievalPipeline({
     places,
     destination,
     embeddingService,
-    store
+    store,
+    hybridWeights
   });
 }
 
@@ -104,13 +124,15 @@ export async function createQdrantRetrievalPipeline({
   places = enrichedTravelPlaces,
   destination = null,
   embeddingService = createEmbeddingService(),
-  store = new QdrantStore({ vectorSize: embeddingService.config?.dimensions || 64 })
+  store = new QdrantStore({ vectorSize: embeddingService.config?.dimensions || 64 }),
+  hybridWeights = defaultHybridRetrievalWeights
 } = {}) {
   return createLocalRetrievalPipeline({
     places,
     destination,
     embeddingService,
-    store
+    store,
+    hybridWeights
   });
 }
 
@@ -131,5 +153,11 @@ export function buildRetrievalQueryText({ query, interests = [], constraints = {
 }
 
 function explainContextMatch(record) {
-  return `${record.title} retrieved from ${record.metadata.destination} with ${record.retrievalConfidence || record.confidence} confidence.`;
+  return explainHybridMatch(record);
+}
+
+function confidenceFromScore(score) {
+  if (score >= 0.75) return "high";
+  if (score >= 0.45) return "medium";
+  return "low";
 }

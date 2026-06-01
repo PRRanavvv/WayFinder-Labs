@@ -45,7 +45,7 @@ Public implementation:
 ai-engine/src/retrieval/qdrantStore.js
 ```
 
-The public demo uses 64-dimensional local hash embeddings so tests run without secrets. Production should switch the embedding provider and Qdrant collection vector size together.
+The public demo uses 64-dimensional local hash embeddings so tests run without secrets. Production Qdrant indexing should use `Xenova/bge-small-en-v1.5` through Transformers.js with 384-dimensional vectors.
 
 Local development still has a deterministic in-memory store for tests:
 

@@ -20,6 +20,7 @@ flowchart TD
 | --- | --- |
 | Chunk generation | `ai-engine/src/retrieval/chunking.js` |
 | Embedding service | `ai-engine/src/retrieval/embeddingService.js` |
+| Hybrid retrieval scoring | `ai-engine/src/retrieval/hybridScoring.js` |
 | Local vector store | `ai-engine/src/retrieval/localVectorStore.js` |
 | Qdrant adapter | `ai-engine/src/retrieval/qdrantStore.js` |
 | pgvector adapter | `ai-engine/src/retrieval/pgvectorStore.js` |
@@ -31,12 +32,22 @@ flowchart TD
 
 The public repo uses `local-hash` embeddings. This provider is deterministic, secret-free, and intended for development tests only.
 
-Production should replace it with a private embedding provider behind the same service contract:
+Production retrieval should use the BGE Small provider through Transformers.js:
+
+```text
+provider: transformers-js
+model: Xenova/bge-small-en-v1.5
+dimensions: 384
+```
+
+The provider stays behind the same service contract:
 
 ```text
 embedText(text) -> number[]
 embedChunks(chunks) -> chunks with embeddings
 ```
+
+Qdrant indexing defaults to BGE Small unless `WAYFINDER_EMBEDDING_PROVIDER` is explicitly set. Local tests keep `local-hash` so they run without model downloads.
 
 ## Re-indexing Workflow
 
@@ -49,6 +60,13 @@ npm run reindex:retrieval
 Index into Qdrant:
 
 ```bash
+QDRANT_URL=http://localhost:6333 npm run qdrant:index
+```
+
+For production-like local indexing, install optional model runtime dependencies first:
+
+```bash
+npm install
 QDRANT_URL=http://localhost:6333 npm run qdrant:index
 ```
 
@@ -92,3 +110,13 @@ Each vector record stores:
 - embedding model
 - embedding dimensions
 - update timestamp
+
+## Hybrid Retrieval
+
+WayFinder retrieval now combines:
+
+- semantic vector score
+- metadata score from category, mood, budget, month, crowd, walking, family, nightlife, adventure, and culture fields
+- keyword score for explicit user terms
+
+Each result includes a `retrievalBreakdown` and `retrievalReasons` array for debugging and product explanations.

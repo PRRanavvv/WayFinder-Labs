@@ -3,7 +3,16 @@ import { updatePreferenceProfile } from "./preferenceMemory.js";
 import { buildItinerary } from "./itineraryLifecycle.js";
 import { buildEmbeddingText, buildRetrievalIndex, retrievePlaces } from "./retrievalIndex.js";
 import { buildTravelMetadataChunks, validateChunks } from "./retrieval/chunking.js";
-import { createEmbeddingService } from "./retrieval/embeddingService.js";
+import {
+  bgeSmallEmbeddingConfig,
+  createBgeSmallEmbeddingService,
+  createEmbeddingService
+} from "./retrieval/embeddingService.js";
+import {
+  defaultHybridRetrievalWeights,
+  explainHybridMatch,
+  scoreHybridRecord
+} from "./retrieval/hybridScoring.js";
 import { LocalVectorStore } from "./retrieval/localVectorStore.js";
 import { PgvectorStore } from "./retrieval/pgvectorStore.js";
 import { QdrantStore } from "./retrieval/qdrantStore.js";
@@ -32,6 +41,10 @@ import {
   defaultDecisionWeights,
   rankCandidates
 } from "./intelligence/rankingEngine.js";
+import {
+  defaultRecommendationWeights,
+  rankDestinationRecommendations
+} from "./intelligence/recommendationEngine.js";
 import {
   runDecisionQualityFlow,
   runIntelligenceFlow
@@ -81,15 +94,20 @@ export {
   createWayfinderRetrievalPipeline,
   defaultConstraintConfig,
   defaultDecisionWeights,
+  defaultHybridRetrievalWeights,
+  defaultRecommendationWeights,
   defaultScoringWeights,
   defaultRetrievalBenchmarkCases,
   applyCandidateToDayState,
   buildDecisionTrace,
+  bgeSmallEmbeddingConfig,
+  createBgeSmallEmbeddingService,
   LocalVectorStore,
   normalizeWeights,
   optimizeItinerary,
   PgvectorStore,
   QdrantStore,
+  rankDestinationRecommendations,
   rankPlaces,
   rankCandidates,
   runDecisionQualityFlow,
@@ -97,9 +115,11 @@ export {
   runRetrievalBenchmark,
   evaluateCandidateConstraints,
   evaluateDecisionQuality,
+  explainHybridMatch,
   explainOptimizedActivity,
   retrievePlaces,
   scoreTravelCandidate,
+  scoreHybridRecord,
   scoringDimensions,
   scoringProfiles,
   enrichedTravelPlaces,

@@ -5,6 +5,7 @@ import {
   createLocalRetrievalPipeline,
   createWayfinderRetrievalPipeline,
   enrichedTravelPlaces,
+  retrievalEvaluationCases,
   retrievalEvaluationPrompts,
   retrievePlaces,
   runRetrievalBenchmark,
@@ -68,6 +69,10 @@ const contextResults = await pipeline.retrieveContext({
 assert.ok(contextResults.length > 0);
 assert.equal(contextResults[0].sourceId, "demo-heritage-1");
 assert.ok(contextResults[0].retrievalScore > 0);
+assert.ok(contextResults[0].retrievalBreakdown.semanticScore >= 0);
+assert.ok(contextResults[0].retrievalBreakdown.metadataScore >= 0);
+assert.ok(contextResults[0].retrievalBreakdown.keywordScore >= 0);
+assert.ok(Array.isArray(contextResults[0].retrievalReasons));
 
 const benchmark = await runRetrievalBenchmark({ pipeline, topK: 3 });
 
@@ -114,5 +119,16 @@ const retrievedBeachIds = new Set(chillBeachContext.map((result) => result.sourc
 assert.ok(retrievedBeachIds.has("goa_002"));
 assert.ok(retrievedBeachIds.has("goa_003"));
 assert.ok(retrievedBeachIds.has("kerala_001"));
+assert.ok(chillBeachContext[0].retrievalReasons.includes("beach"));
+assert.ok(chillBeachContext[0].retrievalReasons.includes("low crowd"));
+
+const wayfinderBenchmark = await runRetrievalBenchmark({
+  pipeline: wayfinderPipeline,
+  cases: retrievalEvaluationCases,
+  topK: 5
+});
+
+assert.equal(wayfinderBenchmark.caseCount, 100);
+assert.ok(wayfinderBenchmark.failureCount <= 10);
 
 console.log("Retrieval tests passed");
