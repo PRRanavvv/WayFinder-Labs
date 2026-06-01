@@ -21,6 +21,7 @@
     "test:retrieval": "npm run test:retrieval --workspace ai-engine",
     "test:intelligence": "npm run test:intelligence --workspace ai-engine",
     "test:decision-quality": "npm run test:decision-quality --workspace ai-engine",
+    "test:itinerary": "npm run test:itinerary --workspace ai-engine",
     "lint": "npm run lint --workspace frontend",
     "format:check": "prettier --check ."
   },

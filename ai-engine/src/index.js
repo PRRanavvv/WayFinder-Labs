@@ -84,6 +84,18 @@ import {
 import { buildDecisionTrace, explainOptimizedActivity } from "./intelligence/explanationEngine.js";
 import { optimizeItinerary } from "./intelligence/optimizationEngine.js";
 import { evaluateDecisionQuality } from "./intelligence/evaluationMetrics.js";
+import {
+  buildDeterministicItinerary,
+  defaultItineraryPlannerConfig,
+  planDeterministicItinerary,
+  replanDeterministicItinerary,
+  validateDeterministicItinerary
+} from "./itinerary/deterministicPlanner.js";
+import {
+  destinationRegionProfiles,
+  estimateTravelMinutes,
+  optimizeRouteOrder
+} from "./itinerary/travelGraph.js";
 export {
   default as globalDestinationPlaceIntelligence,
   destinationProfiles as globalDestinationProfiles
@@ -97,6 +109,7 @@ export {
 
 export {
   buildEmbeddingText,
+  buildDeterministicItinerary,
   buildItinerary,
   buildRetrievalQueryText,
   buildRetrievalIndex,
@@ -112,9 +125,11 @@ export {
   defaultConstraintConfig,
   defaultDecisionWeights,
   defaultHybridRetrievalWeights,
+  defaultItineraryPlannerConfig,
   defaultRecommendationWeights,
   defaultScoringWeights,
   defaultRetrievalBenchmarkCases,
+  destinationRegionProfiles,
   destinationTravelKnowledge,
   hardRetrievalEvaluationCases,
   hardRetrievalEvaluationPrompts,
@@ -127,19 +142,23 @@ export {
   createBgeSmallEmbeddingService,
   LocalVectorStore,
   normalizeWeights,
+  optimizeRouteOrder,
   optimizeItinerary,
+  planDeterministicItinerary,
   PgvectorStore,
   QdrantStore,
   rankDestinationRecommendations,
   rankPlaces,
   rankCandidates,
   recommendationWeightProfiles,
+  replanDeterministicItinerary,
   resolveRecommendationWeights,
   runDecisionQualityFlow,
   runIntelligenceFlow,
   runRetrievalBenchmark,
   evaluateCandidateConstraints,
   evaluateDecisionQuality,
+  estimateTravelMinutes,
   explainHybridMatch,
   explainOptimizedActivity,
   extractTravelIntent,
@@ -156,6 +175,7 @@ export {
   retrievalEvaluationPrompts,
   updatePreferenceProfile,
   validateEnrichedPlace,
+  validateDeterministicItinerary,
   validateOptimizedItinerary,
   validateChunks
 };

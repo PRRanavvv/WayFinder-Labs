@@ -19,6 +19,7 @@
     "test:retrieval:hard": "node tests/hardRetrievalBenchmark.test.js",
     "test:intelligence": "node tests/intelligenceFlow.test.js",
     "test:decision-quality": "node tests/decisionQuality.test.js",
+    "test:itinerary": "node tests/itineraryPlanner.test.js",
     "test:recommendations": "node tests/recommendationEngine.test.js"
   },
   "optionalDependencies": {

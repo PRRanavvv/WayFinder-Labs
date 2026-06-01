@@ -20,6 +20,8 @@ Included:
 - Deterministic decision ranking engine
 - Retrieval-to-ranking intelligence flow
 - Constraint-based optimization layer
+- Deterministic Itinerary Intelligence v1
+- Route-aware scheduling, opening-hour checks, and fatigue limits
 - Recommendation explanation engine
 - Recommendation Ranking Engine v1
 - Configurable recommendation profiles and group satisfaction scoring
@@ -80,6 +82,12 @@ Run decision-quality optimization:
 npm run demo:decision-quality --workspace ai-engine
 ```
 
+Run deterministic itinerary checks:
+
+```bash
+npm run test:itinerary --workspace ai-engine
+```
+
 Run recommendation ranking checks:
 
 ```bash
@@ -99,4 +107,6 @@ Dataset and architecture references:
 - `ai-engine/src/retrieval/benchmarkLeakage.js`
 - `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
 - `ai-engine/src/intelligence/recommendationEngine.js`
+- `ai-engine/src/itinerary/deterministicPlanner.js`
+- `ai-engine/src/itinerary/travelGraph.js`
 - `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`

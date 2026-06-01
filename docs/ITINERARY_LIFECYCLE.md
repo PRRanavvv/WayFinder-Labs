@@ -35,3 +35,8 @@ Every meaningful edit can become a signal:
 
 The public demo shows this concept without including private production behavior models.
 
+## Deterministic Planner
+
+Itinerary Intelligence v1 is documented in `docs/ITINERARY_INTELLIGENCE_V1.md`.
+
+The schedule is generated through deterministic constraints first: opening hours, travel movement, daily limits, fatigue, walking effort, budget, and group profile. LLMs should only explain or refine the resulting plan after the deterministic planner has produced a feasible schedule.

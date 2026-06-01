@@ -1,5 +1,33 @@
 import { getTravelKnowledgeForPlace } from "./travelKnowledge.js";
 
+const cityStateMap = {
+  Goa: "Goa",
+  Varkala: "Kerala",
+  Alleppey: "Kerala",
+  Munnar: "Kerala",
+  Kochi: "Kerala",
+  Wayanad: "Kerala",
+  "McLeod Ganj": "Himachal Pradesh",
+  Rishikesh: "Uttarakhand",
+  Kasol: "Himachal Pradesh",
+  Manali: "Himachal Pradesh",
+  Jaipur: "Rajasthan",
+  Jaisalmer: "Rajasthan",
+  Udaipur: "Rajasthan",
+  Hampi: "Karnataka",
+  Gokarna: "Karnataka",
+  Coorg: "Karnataka",
+  Mumbai: "Maharashtra",
+  Aurangabad: "Maharashtra",
+  Cherrapunji: "Meghalaya",
+  Kaziranga: "Assam",
+  Ziro: "Arunachal Pradesh",
+  "Havelock Island": "Andaman and Nicobar Islands",
+  "Shaheed Dweep": "Andaman and Nicobar Islands",
+  Madurai: "Tamil Nadu",
+  Delhi: "Delhi"
+};
+
 export const requiredEnrichedPlaceFields = [
   "id",
   "name",
@@ -9,6 +37,12 @@ export const requiredEnrichedPlaceFields = [
   "budget_level",
   "best_months",
   "visit_duration_hours",
+  "visitDuration",
+  "openingTime",
+  "closingTime",
+  "fatigueScore",
+  "travelType",
+  "idealTime",
   "crowd_level",
   "walking_required",
   "family_friendly",
@@ -755,6 +789,8 @@ export function validateEnrichedPlace(place) {
 function createPlace(input) {
   const travelKnowledge = getTravelKnowledgeForPlace(input);
   const costBand = budgetBand(input.budget_level);
+  const scheduleMetadata = buildScheduleMetadata(input);
+  const state = input.state || inferState(input.city);
   const tags = unique([
     input.category.toLowerCase(),
     ...input.mood,
@@ -770,7 +806,10 @@ function createPlace(input) {
   return {
     ...input,
     country: input.country || "India",
+    state,
+    region: input.region || state || input.city,
     destination: input.city,
+    routeLocation: input.route_location || input.city,
     avg_temp_monthly: input.avg_temp_monthly || travelKnowledge.avg_temp_monthly,
     peak_season: input.peak_season || travelKnowledge.peak_season,
     monsoon_months: input.monsoon_months || travelKnowledge.monsoon_months,
@@ -781,12 +820,13 @@ function createPlace(input) {
     role: input.role || inferRole(input),
     cluster: input.cluster || input.city,
     tags,
+    ...scheduleMetadata,
     bestFor: input.ideal_for,
     dayWindows: input.day_windows || [],
     retrievalTerms: input.retrieval_terms,
-    fatigue: Number((input.walking_required / 5).toFixed(2)),
+    fatigue: Number((scheduleMetadata.fatigueScore / 5).toFixed(2)),
     estimatedCost: input.cost_estimate_inr,
-    durationMinutes: Math.round(input.visit_duration_hours * 60),
+    durationMinutes: Math.round(scheduleMetadata.visitDuration * 60),
     popularity: Math.round((input.crowd_level / 5) * 100),
     travelTimeFromCenterMinutes: input.travel_time_from_center_minutes ?? 30,
     indoorOutdoor: input.indoor_outdoor || "outdoor",
@@ -798,6 +838,57 @@ function createPlace(input) {
     sourceVisibility: "public-demo",
     semantic_summary: buildSemanticSummary(input)
   };
+}
+
+function buildScheduleMetadata(place) {
+  const idealTime = place.idealTime || inferIdealTime(place);
+  const visitDuration = place.visitDuration ?? place.visit_duration_hours;
+
+  return {
+    visitDuration,
+    visitDurationHours: visitDuration,
+    openingTime: place.openingTime || inferOpeningTime(place),
+    closingTime: place.closingTime || inferClosingTime(place),
+    fatigueScore: place.fatigueScore ?? place.walking_required,
+    travelType: place.travelType || inferTravelType(place),
+    idealTime
+  };
+}
+
+function inferIdealTime(place) {
+  const windows = place.day_windows || [];
+  if (windows.includes("sunset")) return "sunset";
+  if (windows.includes("morning")) return "morning";
+  if (windows.includes("late afternoon")) return "late afternoon";
+  if (windows.includes("afternoon")) return "afternoon";
+  if (windows.includes("evening")) return "evening";
+  if (windows.includes("night")) return "night";
+  return "morning";
+}
+
+function inferOpeningTime(place) {
+  const windows = place.day_windows || [];
+  if (place.category === "Temple") return "06:00";
+  if (windows.includes("night") || windows.includes("evening")) return "10:00";
+  if (windows.includes("sunset") && !windows.includes("morning")) return "12:00";
+  return "09:00";
+}
+
+function inferClosingTime(place) {
+  const windows = place.day_windows || [];
+  if (windows.includes("night")) return "23:30";
+  if (windows.includes("evening") || windows.includes("sunset")) return "20:00";
+  if (windows.length === 1 && windows.includes("morning")) return "12:30";
+  if (windows.includes("late afternoon")) return "18:30";
+  return "18:00";
+}
+
+function inferTravelType(place) {
+  if (place.category === "Backwater" || place.category === "Lake") return "boat";
+  if (place.category === "Wildlife") return "driving";
+  if (place.category === "Trek" || place.walking_required >= 4) return "walking";
+  if (["Heritage", "Market", "Temple", "Village", "Promenade"].includes(place.category)) return "walking";
+  return "mixed";
 }
 
 function buildSemanticSummary(place) {
@@ -851,6 +942,10 @@ function inferWeatherFit(place) {
   if (["Beach", "Island", "Backwater", "Lake"].includes(place.category)) return 76;
   if (place.walking_required >= 4) return 58;
   return 68;
+}
+
+function inferState(city) {
+  return cityStateMap[city] || city;
 }
 
 function unique(values) {
