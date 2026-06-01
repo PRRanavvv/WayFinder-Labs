@@ -202,6 +202,7 @@ export function pointToRecord(point) {
 
 export function buildQdrantFilter(filters = {}) {
   const must = [];
+  const must_not = [];
 
   addMatchValue(must, "destination", filters.destination);
   addMatchAny(must, "entityType", normalizeArray(filters.entityTypes));
@@ -223,7 +224,13 @@ export function buildQdrantFilter(filters = {}) {
     must.push({ key: "familyFriendly", match: { value: true } });
   }
 
-  return must.length ? { must } : undefined;
+  addMatchAny(must_not, "destination", filters.excludedDestinations);
+
+  if (!must.length && !must_not.length) return undefined;
+  return {
+    ...(must.length ? { must } : {}),
+    ...(must_not.length ? { must_not } : {})
+  };
 }
 
 export function qdrantPointIdFromRecordId(recordId) {

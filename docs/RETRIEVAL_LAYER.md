@@ -101,6 +101,13 @@ The benchmark prompt set contains 100 retrieval prompts across romantic trips, f
 
 The latest local benchmark is 100% minimum-hit pass rate on the 100-prompt set after adding travel knowledge, query understanding, and broader acceptable labels for genuinely sensible alternatives.
 
+Hard Benchmark v2 adds 220 messy human prompts and leakage checks:
+
+```bash
+npm run benchmark:retrieval:hard
+npm run analyze:benchmark-leakage
+```
+
 ## Production Boundary
 
 The public demo does not include:

@@ -12,8 +12,11 @@
     "reindex:retrieval": "node scripts/reindexRetrieval.js",
     "qdrant:index": "node scripts/indexQdrant.js",
     "benchmark:retrieval": "node scripts/benchmarkRetrieval.js",
+    "benchmark:retrieval:hard": "node scripts/benchmarkHardRetrieval.js",
     "analyze:retrieval-failures": "node scripts/analyzeRetrievalFailures.js",
+    "analyze:benchmark-leakage": "node scripts/analyzeBenchmarkLeakage.js",
     "test:retrieval": "node tests/retrieval.test.js",
+    "test:retrieval:hard": "node tests/hardRetrievalBenchmark.test.js",
     "test:intelligence": "node tests/intelligenceFlow.test.js",
     "test:decision-quality": "node tests/decisionQuality.test.js",
     "test:recommendations": "node tests/recommendationEngine.test.js"

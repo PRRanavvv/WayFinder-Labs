@@ -75,6 +75,9 @@ export async function createLocalRetrievalPipeline({
     const embedding = await embeddingService.embedText(queryText, { inputType: "query" });
     const resolvedFilters = {
       ...(destination ? { destination } : {}),
+      ...(resolvedConstraints.excludedDestinations?.length ? {
+        excludedDestinations: resolvedConstraints.excludedDestinations
+      } : {}),
       ...filters
     };
 

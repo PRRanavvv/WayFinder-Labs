@@ -54,6 +54,12 @@ Run retrieval benchmarks:
 npm run benchmark:retrieval --workspace ai-engine
 ```
 
+Run the messy hard retrieval benchmark:
+
+```bash
+npm run benchmark:retrieval:hard --workspace ai-engine
+```
+
 Index enriched place records into Qdrant:
 
 ```bash
@@ -89,6 +95,8 @@ Dataset and architecture references:
 - `ai-engine/src/datasets/README.md`
 - `ai-engine/src/retrieval/hybridScoring.js`
 - `ai-engine/src/retrieval/queryUnderstanding.js`
+- `ai-engine/src/retrieval/hardRetrievalBenchmark.js`
+- `ai-engine/src/retrieval/benchmarkLeakage.js`
 - `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
 - `ai-engine/src/intelligence/recommendationEngine.js`
 - `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`

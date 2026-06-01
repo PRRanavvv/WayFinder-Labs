@@ -36,6 +36,11 @@ import {
   retrievalEvaluationCases,
   retrievalEvaluationPrompts
 } from "./retrieval/retrievalEvaluationPrompts.js";
+import {
+  hardRetrievalEvaluationCases,
+  hardRetrievalEvaluationPrompts
+} from "./retrieval/hardRetrievalBenchmark.js";
+import { analyzeBenchmarkLeakage } from "./retrieval/benchmarkLeakage.js";
 import { createDecisionLog } from "./intelligence/decisionLogger.js";
 import {
   defaultDecisionWeights,
@@ -111,7 +116,10 @@ export {
   defaultScoringWeights,
   defaultRetrievalBenchmarkCases,
   destinationTravelKnowledge,
+  hardRetrievalEvaluationCases,
+  hardRetrievalEvaluationPrompts,
   applyCandidateToDayState,
+  analyzeBenchmarkLeakage,
   buildDecisionTrace,
   bgeSmallEmbeddingConfig,
   calculateGroupSatisfaction,

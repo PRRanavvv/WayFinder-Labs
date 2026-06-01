@@ -10,6 +10,7 @@ export function extractTravelIntent({ query = "", interests = [], constraints = 
   const vibe = extractVibe(tokens);
   const climatePreference = extractClimatePreference(tokens);
   const activityIntent = extractActivityIntent(tokens);
+  const excludedDestinations = extractExcludedDestinations(text);
 
   return {
     trip_type: tripType,
@@ -19,6 +20,7 @@ export function extractTravelIntent({ query = "", interests = [], constraints = 
     vibe,
     climate_preference: climatePreference,
     activity_intent: activityIntent,
+    excluded_destinations: excludedDestinations,
     groupType: tripType,
     budgetBand: budget,
     expandedInterests: unique([
@@ -30,7 +32,8 @@ export function extractTravelIntent({ query = "", interests = [], constraints = 
       vibe,
       climatePreference,
       activityIntent
-    ])
+    ]),
+    excludedDestinations
   };
 }
 
@@ -48,7 +51,8 @@ export function mergeIntentIntoRetrievalInput({ query = "", interests = [], cons
       ...(intent.budgetBand ? { budgetBand: intent.budgetBand } : {}),
       ...(intent.vibe ? { vibe: intent.vibe } : {}),
       ...(intent.climate_preference ? { climatePreference: intent.climate_preference } : {}),
-      ...(intent.activity_intent ? { activityIntent: intent.activity_intent } : {})
+      ...(intent.activity_intent ? { activityIntent: intent.activity_intent } : {}),
+      ...(intent.excludedDestinations?.length ? { excludedDestinations: intent.excludedDestinations } : {})
     }
   };
 }
@@ -104,9 +108,24 @@ function extractActivityIntent(tokens) {
   if (hasAny(tokens, ["beach", "coast", "coastal"])) return "beach";
   if (hasAny(tokens, ["heritage", "historic", "history", "architecture", "temple"])) return "heritage";
   if (hasAny(tokens, ["nature", "green", "forest", "wildlife", "waterfall"])) return "nature";
-  if (hasAny(tokens, ["food", "market", "cafe", "cafes"])) return "food";
+  if (hasAny(tokens, ["food", "market", "cafe", "cafes", "vegetarian", "veg"])) return "food";
   if (hasAny(tokens, ["photography", "photo", "photos", "sunset"])) return "photography";
   return null;
+}
+
+function extractExcludedDestinations(text) {
+  const normalized = normalizeText(text);
+  const excluded = [];
+
+  for (const destination of knownDestinations) {
+    const destinationText = normalizeText(destination);
+    if (!normalized.includes(destinationText)) continue;
+
+    const exclusionPattern = new RegExp(`(not|no|avoid|skip|except|done|already|bored of|fatigue|overdone).{0,30}${destinationText}|${destinationText}.{0,30}(again|twice|done|fatigue|overdone)`, "i");
+    if (exclusionPattern.test(normalized)) excluded.push(destination);
+  }
+
+  return excluded;
 }
 
 function hasAny(tokens, values) {
@@ -142,3 +161,23 @@ const monthAliases = new Map([
   ["dec", "dec"],
   ["december", "dec"]
 ]);
+
+const knownDestinations = [
+  "Goa",
+  "Varkala",
+  "Alleppey",
+  "Munnar",
+  "Kochi",
+  "Wayanad",
+  "Jaipur",
+  "Jaisalmer",
+  "Udaipur",
+  "Hampi",
+  "Gokarna",
+  "Coorg",
+  "Mumbai",
+  "Delhi",
+  "Manali",
+  "Kasol",
+  "Rishikesh"
+];

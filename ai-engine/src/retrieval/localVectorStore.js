@@ -55,6 +55,10 @@ export class LocalVectorStore {
 
 export function matchesFilters(metadata = {}, filters = {}) {
   if (filters.destination && metadata.destination !== filters.destination) return false;
+  if (filters.excludedDestinations?.length) {
+    const excluded = new Set(filters.excludedDestinations.map(normalize));
+    if (excluded.has(normalize(metadata.destination)) || excluded.has(normalize(metadata.city))) return false;
+  }
   if (filters.entityTypes?.length && !filters.entityTypes.includes(metadata.entityType)) return false;
   if (filters.roles?.length && !filters.roles.includes(metadata.role)) return false;
   if (filters.clusters?.length && !filters.clusters.includes(metadata.cluster)) return false;
