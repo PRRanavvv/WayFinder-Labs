@@ -6,11 +6,13 @@ Included:
 - Sample semantic ranker
 - Public-safe retrieval index
 - Global destination mock dataset
+- Enriched place metadata for retrieval evaluation
 - Grounded destination and place visual assets
 - Embeddings-ready sample metadata
 - Metadata-aware chunking pipeline
-- Local vector store and pgvector adapter
+- Local vector store and Qdrant adapter
 - Retrieval benchmark scripts
+- 100 retrieval evaluation prompts
 - Deterministic decision ranking engine
 - Retrieval-to-ranking intelligence flow
 - Constraint-based optimization layer
@@ -46,6 +48,12 @@ Run retrieval benchmarks:
 npm run benchmark:retrieval --workspace ai-engine
 ```
 
+Index enriched place records into Qdrant:
+
+```bash
+QDRANT_URL=http://localhost:6333 npm run qdrant:index --workspace ai-engine
+```
+
 Run intelligence flow:
 
 ```bash
@@ -61,6 +69,8 @@ npm run demo:decision-quality --workspace ai-engine
 Dataset and architecture references:
 
 - `ai-engine/src/datasets/globalDestinationDataset.js`
+- `ai-engine/src/datasets/enrichedPlaces.js`
 - `ai-engine/src/datasets/destinationVisualAssets.js`
 - `ai-engine/src/datasets/README.md`
+- `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
 - `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`

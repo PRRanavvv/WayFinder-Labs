@@ -3,18 +3,28 @@ import { demoPlaces } from "./samplePlaces.js";
 export function buildRetrievalIndex({ places = demoPlaces } = {}) {
   return places.map((place) => {
     const embeddingText = buildEmbeddingText(place);
+    const category = categoryOf(place);
 
     return {
-      id: place.id,
+      id: idOf(place),
       place,
       embeddingText,
       vector: vectorize(embeddingText),
       metadata: {
-        type: place.type,
+        type: category,
         role: place.role,
         cluster: place.cluster,
         tags: place.tags,
-        dayWindows: place.dayWindows || []
+        dayWindows: place.dayWindows || place.day_windows || [],
+        mood: place.mood || [],
+        idealFor: place.ideal_for || place.bestFor || [],
+        budgetLevel: place.budget_level,
+        crowdLevel: place.crowd_level,
+        walkingRequired: place.walking_required,
+        familyFriendly: place.family_friendly,
+        nightlifeScore: place.nightlife_score,
+        adventureScore: place.adventure_score,
+        culturalScore: place.cultural_score
       }
     };
   });
@@ -52,15 +62,28 @@ export function retrievePlaces({
 
 export function buildEmbeddingText(place) {
   return [
-    place.name,
-    place.type,
+    nameOf(place),
+    place.city,
+    place.country,
+    categoryOf(place),
     place.role,
     place.cluster,
+    place.semantic_summary,
     place.summary,
+    place.family_friendly ? "family friendly" : "adult oriented",
+    budgetText(place.budget_level),
+    crowdText(place.crowd_level),
+    walkingText(place.walking_required),
+    scoreText("nightlife", place.nightlife_score),
+    scoreText("adventure", place.adventure_score),
+    scoreText("culture", place.cultural_score),
     ...(place.tags || []),
+    ...(place.mood || []),
+    ...(place.ideal_for || []),
+    ...(place.best_months || []),
     ...(place.bestFor || []),
-    ...(place.dayWindows || []),
-    ...(place.retrievalTerms || [])
+    ...(place.dayWindows || place.day_windows || []),
+    ...(place.retrievalTerms || place.retrieval_terms || [])
   ].join(" ");
 }
 
@@ -72,7 +95,11 @@ function buildQueryText({ query, interests, constraints }) {
     constraints.weather,
     constraints.groupType,
     constraints.timeOfDay,
-    constraints.energyLevel
+    constraints.energyLevel,
+    constraints.budgetBand,
+    constraints.crowdLevel,
+    constraints.season,
+    constraints.duration
   ].join(" ");
 }
 
@@ -80,11 +107,14 @@ function contextualFit(place, { interests, constraints }) {
   let score = 58;
   const normalizedInterests = new Set((interests || []).map(normalize));
   const placeTerms = new Set([
-    place.type,
+    categoryOf(place),
     place.role,
     ...(place.tags || []),
+    ...(place.mood || []),
+    ...(place.ideal_for || []),
     ...(place.bestFor || []),
-    ...(place.dayWindows || [])
+    ...(place.best_months || []),
+    ...(place.dayWindows || place.day_windows || [])
   ].map(normalize));
 
   for (const interest of normalizedInterests) {
@@ -95,11 +125,61 @@ function contextualFit(place, { interests, constraints }) {
   if (constraints.energyLevel === "high" && place.fatigue >= 0.5) score += 10;
   if (constraints.pace === "slow" && place.role === "recovery") score += 14;
   if (constraints.weather === "indoor" && place.weatherFit >= 90) score += 12;
-  if (constraints.timeOfDay && (place.dayWindows || []).map(normalize).includes(normalize(constraints.timeOfDay))) {
+  if (constraints.budgetBand && normalize(place.costBand) === normalize(constraints.budgetBand)) score += 10;
+  if (constraints.crowdLevel === "low" && place.crowd_level <= 2) score += 18;
+  if (constraints.groupType && (place.ideal_for || place.bestFor || []).map(normalize).includes(normalize(constraints.groupType))) {
+    score += 10;
+  }
+  if (constraints.timeOfDay && (place.dayWindows || place.day_windows || []).map(normalize).includes(normalize(constraints.timeOfDay))) {
     score += 12;
+  }
+  if (constraints.season === "winter" && (place.best_months || []).some((month) => ["nov", "dec", "jan", "feb"].includes(normalize(month)))) {
+    score += 8;
   }
 
   return clamp(score, 0, 100);
+}
+
+function idOf(place) {
+  return place.id || place.placeId;
+}
+
+function nameOf(place) {
+  return place.name || place.canonicalName;
+}
+
+function categoryOf(place) {
+  return place.category || place.type || place.primaryCategory;
+}
+
+function budgetText(level) {
+  if (!level) return "";
+  if (level <= 1) return "budget low cost cheap";
+  if (level === 2) return "moderate budget";
+  if (level === 3) return "upper medium budget";
+  return "premium luxury higher budget";
+}
+
+function crowdText(level) {
+  if (!level) return "";
+  if (level <= 1) return "very low crowd hidden quiet uncrowded fewer crowds";
+  if (level === 2) return "low crowd quiet fewer crowds";
+  if (level === 3) return "moderate crowd";
+  return "busy crowded popular high crowd";
+}
+
+function walkingText(level) {
+  if (!level) return "";
+  if (level <= 2) return "low walking easy movement";
+  if (level === 3) return "moderate walking";
+  return "high walking trek active";
+}
+
+function scoreText(label, score) {
+  if (!score) return "";
+  if (score >= 4) return `high ${label}`;
+  if (score <= 1) return `low ${label}`;
+  return `moderate ${label}`;
 }
 
 function vectorize(text) {

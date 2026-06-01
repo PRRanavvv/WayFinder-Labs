@@ -10,6 +10,7 @@
     "demo:decision-quality": "node examples/decisionQualityDemo.js",
     "ingest:retrieval": "node scripts/ingestRetrieval.js",
     "reindex:retrieval": "node scripts/reindexRetrieval.js",
+    "qdrant:index": "node scripts/indexQdrant.js",
     "benchmark:retrieval": "node scripts/benchmarkRetrieval.js",
     "test:retrieval": "node tests/retrieval.test.js",
     "test:intelligence": "node tests/intelligenceFlow.test.js",

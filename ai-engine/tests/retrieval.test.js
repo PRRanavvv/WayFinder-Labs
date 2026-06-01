@@ -3,8 +3,12 @@ import {
   buildRetrievalRecords,
   buildTravelMetadataChunks,
   createLocalRetrievalPipeline,
+  createWayfinderRetrievalPipeline,
+  enrichedTravelPlaces,
+  retrievalEvaluationPrompts,
   retrievePlaces,
   runRetrievalBenchmark,
+  validateEnrichedPlace,
   validateChunks
 } from "../src/index.js";
 
@@ -70,5 +74,45 @@ const benchmark = await runRetrievalBenchmark({ pipeline, topK: 3 });
 assert.equal(benchmark.caseCount, 3);
 assert.equal(benchmark.failureCount, 0);
 assert.ok(benchmark.averages.latencyMs >= 0);
+
+assert.equal(enrichedTravelPlaces.length, 33);
+assert.equal(retrievalEvaluationPrompts.length, 100);
+assert.ok(enrichedTravelPlaces.every((place) => validateEnrichedPlace(place).length === 0));
+
+const chillBeachResults = retrievePlaces({
+  places: enrichedTravelPlaces,
+  query: "I want a chill beach with fewer crowds and good sunsets",
+  interests: ["beach", "chill", "sunset", "fewer crowds"],
+  constraints: {
+    pace: "slow",
+    crowdLevel: "low",
+    timeOfDay: "sunset"
+  },
+  topK: 3
+});
+
+assert.deepEqual(
+  chillBeachResults.map((place) => place.id),
+  ["goa_002", "goa_003", "kerala_001"]
+);
+
+const wayfinderPipeline = await createWayfinderRetrievalPipeline();
+await wayfinderPipeline.indexPlaces();
+
+const chillBeachContext = await wayfinderPipeline.retrieveContext({
+  query: "I want a chill beach with fewer crowds and good sunsets",
+  interests: ["beach", "chill", "sunset", "fewer crowds"],
+  constraints: {
+    pace: "slow",
+    crowdLevel: "low",
+    timeOfDay: "sunset"
+  },
+  topK: 6
+});
+
+const retrievedBeachIds = new Set(chillBeachContext.map((result) => result.sourceId));
+assert.ok(retrievedBeachIds.has("goa_002"));
+assert.ok(retrievedBeachIds.has("goa_003"));
+assert.ok(retrievedBeachIds.has("kerala_001"));
 
 console.log("Retrieval tests passed");

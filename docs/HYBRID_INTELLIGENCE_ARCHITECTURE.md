@@ -12,7 +12,7 @@ Do not introduce a Python service until the TypeScript intelligence layer has st
 | --- | --- |
 | Orchestration | Retrieval, ranking, optimization flow coordination |
 | APIs | Backend contracts and frontend integration |
-| Persistence | PostgreSQL, pgvector, Prisma boundary |
+| Persistence | PostgreSQL, Prisma boundary, Qdrant retrieval index |
 | Session state | Itinerary state, recalculation state, user interactions |
 | Deterministic logic | Public-safe scoring, constraints, validation |
 | Frontend integration | React/React Flow planning workspace |

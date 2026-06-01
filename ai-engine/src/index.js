@@ -6,15 +6,27 @@ import { buildTravelMetadataChunks, validateChunks } from "./retrieval/chunking.
 import { createEmbeddingService } from "./retrieval/embeddingService.js";
 import { LocalVectorStore } from "./retrieval/localVectorStore.js";
 import { PgvectorStore } from "./retrieval/pgvectorStore.js";
+import { QdrantStore } from "./retrieval/qdrantStore.js";
 import {
   buildRetrievalQueryText,
+  createQdrantRetrievalPipeline,
   buildRetrievalRecords,
-  createLocalRetrievalPipeline
+  createLocalRetrievalPipeline,
+  createWayfinderRetrievalPipeline
 } from "./retrieval/retrievalPipeline.js";
 import {
   defaultRetrievalBenchmarkCases,
   runRetrievalBenchmark
 } from "./retrieval/retrievalBenchmark.js";
+import {
+  enrichedTravelPlaces,
+  requiredEnrichedPlaceFields,
+  validateEnrichedPlace
+} from "./datasets/enrichedPlaces.js";
+import {
+  retrievalEvaluationCases,
+  retrievalEvaluationPrompts
+} from "./retrieval/retrievalEvaluationPrompts.js";
 import { createDecisionLog } from "./intelligence/decisionLogger.js";
 import {
   defaultDecisionWeights,
@@ -65,6 +77,8 @@ export {
   createScoringConfig,
   createEmptyDayState,
   createLocalRetrievalPipeline,
+  createQdrantRetrievalPipeline,
+  createWayfinderRetrievalPipeline,
   defaultConstraintConfig,
   defaultDecisionWeights,
   defaultScoringWeights,
@@ -75,6 +89,7 @@ export {
   normalizeWeights,
   optimizeItinerary,
   PgvectorStore,
+  QdrantStore,
   rankPlaces,
   rankCandidates,
   runDecisionQualityFlow,
@@ -87,7 +102,12 @@ export {
   scoreTravelCandidate,
   scoringDimensions,
   scoringProfiles,
+  enrichedTravelPlaces,
+  requiredEnrichedPlaceFields,
+  retrievalEvaluationCases,
+  retrievalEvaluationPrompts,
   updatePreferenceProfile,
+  validateEnrichedPlace,
   validateOptimizedItinerary,
   validateChunks
 };

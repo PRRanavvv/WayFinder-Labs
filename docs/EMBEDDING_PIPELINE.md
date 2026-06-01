@@ -21,8 +21,11 @@ flowchart TD
 | Chunk generation | `ai-engine/src/retrieval/chunking.js` |
 | Embedding service | `ai-engine/src/retrieval/embeddingService.js` |
 | Local vector store | `ai-engine/src/retrieval/localVectorStore.js` |
+| Qdrant adapter | `ai-engine/src/retrieval/qdrantStore.js` |
 | pgvector adapter | `ai-engine/src/retrieval/pgvectorStore.js` |
 | Retrieval pipeline | `ai-engine/src/retrieval/retrievalPipeline.js` |
+| Enriched place dataset | `ai-engine/src/datasets/enrichedPlaces.js` |
+| Retrieval eval prompts | `ai-engine/src/retrieval/retrievalEvaluationPrompts.js` |
 
 ## Embedding Provider Boundary
 
@@ -43,6 +46,12 @@ Run a local reindex:
 npm run reindex:retrieval
 ```
 
+Index into Qdrant:
+
+```bash
+QDRANT_URL=http://localhost:6333 npm run qdrant:index
+```
+
 Generate a local cache artifact:
 
 ```bash
@@ -59,6 +68,19 @@ Embedding updates should be triggered when:
 - chunking logic changes
 - embedding model changes
 - retrieval filters or scoring fields change
+
+The enriched place metadata now includes:
+
+- category
+- mood
+- ideal traveler groups
+- budget level
+- best months
+- visit duration
+- crowd level
+- walking effort
+- family friendliness
+- nightlife, adventure, and cultural scores
 
 Each vector record stores:
 

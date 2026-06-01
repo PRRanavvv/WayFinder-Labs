@@ -58,18 +58,32 @@ export function matchesFilters(metadata = {}, filters = {}) {
   if (filters.entityTypes?.length && !filters.entityTypes.includes(metadata.entityType)) return false;
   if (filters.roles?.length && !filters.roles.includes(metadata.role)) return false;
   if (filters.clusters?.length && !filters.clusters.includes(metadata.cluster)) return false;
+  if (filters.categories?.length && !filters.categories.map(normalize).includes(normalize(metadata.category || metadata.type))) return false;
+  if (filters.costBands?.length && !filters.costBands.map(normalize).includes(normalize(metadata.costBand))) return false;
+  if (filters.budgetLevelMax && metadata.budgetLevel > filters.budgetLevelMax) return false;
+  if (filters.crowdLevelMax && metadata.crowdLevel > filters.crowdLevelMax) return false;
+  if (filters.familyFriendly === true && metadata.familyFriendly !== true) return false;
 
   if (filters.tags?.length) {
-    const tags = new Set(metadata.tags || []);
-    if (!filters.tags.some((tag) => tags.has(tag))) return false;
+    const tags = new Set([
+      ...(metadata.tags || []),
+      ...(metadata.mood || []),
+      ...(metadata.idealFor || []),
+      ...(metadata.bestFor || [])
+    ].map(normalize));
+    if (!filters.tags.some((tag) => tags.has(normalize(tag)))) return false;
   }
 
   if (filters.dayWindows?.length) {
-    const dayWindows = new Set(metadata.dayWindows || []);
-    if (!filters.dayWindows.some((window) => dayWindows.has(window))) return false;
+    const dayWindows = new Set((metadata.dayWindows || []).map(normalize));
+    if (!filters.dayWindows.some((window) => dayWindows.has(normalize(window)))) return false;
   }
 
   return true;
+}
+
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function confidenceFromSimilarity(similarity) {

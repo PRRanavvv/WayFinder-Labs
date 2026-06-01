@@ -1,8 +1,8 @@
 # Retrieval Layer
 
-The Week 4 AI/ML milestone turns public-safe place metadata into a retrieval-ready system.
+The retrieval layer turns public-safe place metadata into semantic search context for trip planning.
 
-This repo now contains a production-facing retrieval foundation with a runnable local store and a pgvector adapter. The local store keeps public tests and demos secret-free. The pgvector path is the selected production architecture for the MVP phase.
+This repo now contains a production-facing retrieval foundation with a runnable local store and a Qdrant adapter. The local store keeps public tests and demos secret-free. Qdrant is the selected vector database path for the WayFinder place-intelligence layer.
 
 ## Public Retrieval Flow
 
@@ -11,7 +11,7 @@ flowchart TD
   Intent["Trip Intent"] --> Query["Query Text Builder"]
   Metadata["Public-safe Place Metadata"] --> Chunker["Metadata-aware Chunker"]
   Chunker --> Embed["Embedding Service"]
-  Embed --> Index["Vector Store<br/>local demo or pgvector"]
+  Embed --> Index["Vector Store<br/>local demo or Qdrant"]
   Query --> Search["Semantic Retrieval"]
   Index --> Search
   Search --> Context["Contextual Fit Scoring"]
@@ -31,6 +31,9 @@ flowchart TD
 | `constraints.timeOfDay` | Matches places to useful day windows |
 | `constraints.weather` | Supports indoor or weather-resilient candidates |
 | `constraints.groupType` | Preserves room for group-aware retrieval signals |
+| `constraints.budgetBand` | Supports budget, moderate, and premium travel intent |
+| `constraints.crowdLevel` | Helps retrieve quieter or busier places |
+| `constraints.season` | Preserves seasonal travel signals such as winter |
 
 ## Retrieval Outputs
 
@@ -51,12 +54,13 @@ Current files:
 - `ai-engine/src/retrieval/chunking.js`
 - `ai-engine/src/retrieval/embeddingService.js`
 - `ai-engine/src/retrieval/localVectorStore.js`
-- `ai-engine/src/retrieval/pgvectorStore.js`
+- `ai-engine/src/retrieval/qdrantStore.js`
 - `ai-engine/src/retrieval/retrievalPipeline.js`
 - `ai-engine/src/retrieval/retrievalBenchmark.js`
+- `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
 - `ai-engine/examples/retrievalDemo.js`
+- `ai-engine/src/datasets/enrichedPlaces.js`
 - `ai-engine/src/samplePlaces.js`
-- `ai-engine/database/pgvector-schema.sql`
 
 Run the demo:
 
@@ -81,6 +85,14 @@ Run a local reindex:
 ```bash
 npm run reindex:retrieval
 ```
+
+Index into Qdrant:
+
+```bash
+QDRANT_URL=http://localhost:6333 npm run qdrant:index
+```
+
+The benchmark prompt set contains 100 retrieval prompts across romantic trips, family vacations, budget backpacking, hidden gems, nature-focused travel, adventure trips, beach intent, nightlife, heritage, low-energy plans, food/market walks, wildlife, solo wellness, premium couples trips, weekend city breaks, and winter travel.
 
 ## Production Boundary
 

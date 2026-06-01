@@ -19,7 +19,7 @@ This roadmap records the team direction while keeping implementation ownership c
 | Week 1 | Core System and Architecture Design | AI architecture docs, recommendation schemas, metadata system plan, scoring parameter plan |
 | Week 2 | AI Generation Layer | Structured prompting pipeline, JSON output contract, itinerary generation logic, validation rules |
 | Week 3 | Intelligence Layer | Safe travel metadata model, tagging taxonomy, public-safe categorization examples |
-| Week 4 | Retrieval Layer | pgvector selection, embeddings pipeline, chunking strategy, retrieval benchmark flow |
+| Week 4 | Retrieval Layer | Enriched metadata, Qdrant selection, embeddings pipeline, chunking strategy, 100 prompt retrieval benchmark flow |
 | Week 5 | Recommendation Engine | Deterministic ranking engine, budget/preference scoring hooks, decision logs, retrieval-to-ranking flow |
 | Week 6 | Orchestration Layer | Retrieval + ranking + constraint orchestration, dynamic recalculation flow, reasoning refinement |
 | Week 7 | Reliability Layer | Constraint validation, itinerary optimization, decision traces, quality metrics |

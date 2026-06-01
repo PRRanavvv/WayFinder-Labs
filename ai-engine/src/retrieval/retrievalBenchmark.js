@@ -50,33 +50,50 @@ export async function runRetrievalBenchmark({
       query: benchmarkCase.query,
       interests: benchmarkCase.interests,
       constraints: benchmarkCase.constraints,
-      topK
+      topK: topK * 2
     });
     const latencyMs = Number((performance.now() - startedAt).toFixed(2));
 
-    const retrievedSourceIds = new Set(results.map((result) => result.sourceId));
+    const uniqueResults = dedupeBySourceId(results).slice(0, topK);
+    const retrievedSourceIds = new Set(uniqueResults.map((result) => result.sourceId));
     const relevantSourceIds = new Set(benchmarkCase.relevantSourceIds);
     const hits = [...relevantSourceIds].filter((id) => retrievedSourceIds.has(id)).length;
-    const precisionAtK = hits / Math.max(results.length, 1);
+    const precisionAtK = hits / Math.max(uniqueResults.length, 1);
     const recallAtK = hits / Math.max(relevantSourceIds.size, 1);
+    const minimumHits = benchmarkCase.minimumHits ?? relevantSourceIds.size;
 
     caseReports.push({
       id: benchmarkCase.id,
       latencyMs,
       precisionAtK: Number(precisionAtK.toFixed(3)),
       recallAtK: Number(recallAtK.toFixed(3)),
-      topResults: results.map((result) => ({
+      hits,
+      minimumHits,
+      topResults: uniqueResults.map((result) => ({
         id: result.id,
         sourceId: result.sourceId,
         title: result.title,
         score: result.retrievalScore,
         confidence: result.retrievalConfidence
       })),
-      failure: recallAtK < 1
+      failure: hits < minimumHits
     });
   }
 
   return summarizeBenchmark(caseReports);
+}
+
+function dedupeBySourceId(results) {
+  const seen = new Set();
+  const uniqueResults = [];
+
+  for (const result of results) {
+    if (seen.has(result.sourceId)) continue;
+    seen.add(result.sourceId);
+    uniqueResults.push(result);
+  }
+
+  return uniqueResults;
 }
 
 function summarizeBenchmark(cases) {

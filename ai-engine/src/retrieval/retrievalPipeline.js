@@ -1,7 +1,9 @@
 import { demoPlaces } from "../samplePlaces.js";
+import { enrichedTravelPlaces } from "../datasets/enrichedPlaces.js";
 import { buildTravelMetadataChunks, validateChunks } from "./chunking.js";
 import { createEmbeddingService } from "./embeddingService.js";
 import { LocalVectorStore } from "./localVectorStore.js";
+import { QdrantStore } from "./qdrantStore.js";
 
 export async function buildRetrievalRecords({
   places = demoPlaces,
@@ -84,6 +86,34 @@ export async function createLocalRetrievalPipeline({
   };
 }
 
+export async function createWayfinderRetrievalPipeline({
+  places = enrichedTravelPlaces,
+  destination = null,
+  embeddingService = createEmbeddingService(),
+  store = new LocalVectorStore()
+} = {}) {
+  return createLocalRetrievalPipeline({
+    places,
+    destination,
+    embeddingService,
+    store
+  });
+}
+
+export async function createQdrantRetrievalPipeline({
+  places = enrichedTravelPlaces,
+  destination = null,
+  embeddingService = createEmbeddingService(),
+  store = new QdrantStore({ vectorSize: embeddingService.config?.dimensions || 64 })
+} = {}) {
+  return createLocalRetrievalPipeline({
+    places,
+    destination,
+    embeddingService,
+    store
+  });
+}
+
 export function buildRetrievalQueryText({ query, interests = [], constraints = {} } = {}) {
   return [
     query,
@@ -93,7 +123,10 @@ export function buildRetrievalQueryText({ query, interests = [], constraints = {
     constraints.timeOfDay,
     constraints.weather,
     constraints.groupType,
-    constraints.budgetBand
+    constraints.budgetBand,
+    constraints.crowdLevel,
+    constraints.season,
+    constraints.duration
   ].filter(Boolean).join(" ");
 }
 
