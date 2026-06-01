@@ -7,6 +7,8 @@ Included:
 - Public-safe retrieval index
 - Global destination mock dataset
 - Enriched place metadata for retrieval evaluation
+- Travel climate and season knowledge layer
+- Query understanding before retrieval
 - Grounded destination and place visual assets
 - Embeddings-ready sample metadata
 - Metadata-aware chunking pipeline
@@ -20,6 +22,7 @@ Included:
 - Constraint-based optimization layer
 - Recommendation explanation engine
 - Recommendation Ranking Engine v1
+- Configurable recommendation profiles and group satisfaction scoring
 - Decision quality evaluation metrics
 - Decision logs for explainability and debugging
 - Simple preference memory update loop
@@ -81,9 +84,11 @@ Dataset and architecture references:
 
 - `ai-engine/src/datasets/globalDestinationDataset.js`
 - `ai-engine/src/datasets/enrichedPlaces.js`
+- `ai-engine/src/datasets/travelKnowledge.js`
 - `ai-engine/src/datasets/destinationVisualAssets.js`
 - `ai-engine/src/datasets/README.md`
 - `ai-engine/src/retrieval/hybridScoring.js`
+- `ai-engine/src/retrieval/queryUnderstanding.js`
 - `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
 - `ai-engine/src/intelligence/recommendationEngine.js`
 - `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`

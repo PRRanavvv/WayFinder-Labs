@@ -61,6 +61,10 @@ function buildOverviewChunk(place, destination) {
       `Mood: ${(place.mood || []).join(", ")}.`,
       `Ideal for: ${(place.ideal_for || place.bestFor || []).join(", ")}.`,
       `Best months: ${(place.best_months || []).join(", ")}.`,
+      `Average monthly temperature: ${formatMonthlyTemps(place.avg_temp_monthly)}.`,
+      `Peak season: ${(place.peak_season || []).join(", ")}.`,
+      `Monsoon months: ${(place.monsoon_months || []).join(", ")}.`,
+      `Climate tags: ${(place.climate_tags || []).join(", ")}.`,
       `Scores: nightlife ${place.nightlife_score ?? "unknown"}, adventure ${place.adventure_score ?? "unknown"}, culture ${place.cultural_score ?? "unknown"}.`,
       `Tags: ${(place.tags || []).join(", ")}.`,
       `Retrieval terms: ${(place.retrievalTerms || place.retrieval_terms || []).join(", ")}.`
@@ -115,6 +119,11 @@ function buildChunkMetadata(place, destination) {
     idealFor: place.ideal_for || place.bestFor || [],
     bestFor: place.bestFor || place.ideal_for || [],
     bestMonths: place.best_months || [],
+    avgTempMonthly: place.avg_temp_monthly || {},
+    peakSeason: place.peak_season || [],
+    monsoonMonths: place.monsoon_months || [],
+    climateTags: place.climate_tags || [],
+    seasonalNotes: place.seasonal_notes || [],
     dayWindows: place.dayWindows || place.day_windows || [],
     budgetLevel: place.budget_level,
     costBand: place.costBand || "unknown",
@@ -158,4 +167,10 @@ function nameOf(place) {
 
 function categoryOf(place) {
   return String(place.category || place.type || place.primaryCategory || "activity").toLowerCase();
+}
+
+function formatMonthlyTemps(monthlyTemps = {}) {
+  return Object.entries(monthlyTemps)
+    .map(([month, temp]) => `${month}:${temp}C`)
+    .join(", ");
 }

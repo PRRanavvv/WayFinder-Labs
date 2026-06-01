@@ -8,6 +8,7 @@ import {
   scoreHybridRecord
 } from "./hybridScoring.js";
 import { LocalVectorStore } from "./localVectorStore.js";
+import { mergeIntentIntoRetrievalInput } from "./queryUnderstanding.js";
 import { QdrantStore } from "./qdrantStore.js";
 
 export async function buildRetrievalRecords({
@@ -63,7 +64,14 @@ export async function createLocalRetrievalPipeline({
     minScore = 0,
     candidatePoolSize = Math.max(topK * 10, 60)
   } = {}) {
-    const queryText = buildRetrievalQueryText({ query, interests, constraints });
+    const understood = mergeIntentIntoRetrievalInput({ query, interests, constraints });
+    const resolvedInterests = understood.interests;
+    const resolvedConstraints = understood.constraints;
+    const queryText = buildRetrievalQueryText({
+      query,
+      interests: resolvedInterests,
+      constraints: resolvedConstraints
+    });
     const embedding = await embeddingService.embedText(queryText, { inputType: "query" });
     const resolvedFilters = {
       ...(destination ? { destination } : {}),
@@ -82,8 +90,8 @@ export async function createLocalRetrievalPipeline({
         record,
         query,
         queryText,
-        interests,
-        constraints,
+        interests: resolvedInterests,
+        constraints: resolvedConstraints,
         weights: hybridWeights
       }))
       .sort((a, b) => b.hybridScore - a.hybridScore)
@@ -92,6 +100,7 @@ export async function createLocalRetrievalPipeline({
         ...record,
         retrievalScore: Number((record.hybridScore * 100).toFixed(2)),
         retrievalConfidence: confidenceFromScore(record.hybridScore),
+        queryIntent: understood.intent,
         retrievalReason: explainContextMatch(record)
       }));
   }
@@ -148,7 +157,11 @@ export function buildRetrievalQueryText({ query, interests = [], constraints = {
     constraints.budgetBand,
     constraints.crowdLevel,
     constraints.season,
-    constraints.duration
+    constraints.month,
+    constraints.duration,
+    constraints.vibe,
+    constraints.climatePreference,
+    constraints.activityIntent
   ].filter(Boolean).join(" ");
 }
 

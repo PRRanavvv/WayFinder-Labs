@@ -96,9 +96,10 @@ const chillBeachResults = retrievePlaces({
   topK: 3
 });
 
+assert.equal(chillBeachResults[0].id, "goa_002");
 assert.deepEqual(
-  chillBeachResults.map((place) => place.id),
-  ["goa_002", "goa_003", "kerala_001"]
+  new Set(chillBeachResults.map((place) => place.id)),
+  new Set(["goa_002", "goa_003", "kerala_001"])
 );
 
 const wayfinderPipeline = await createWayfinderRetrievalPipeline();

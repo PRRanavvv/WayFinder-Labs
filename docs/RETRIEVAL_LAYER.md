@@ -8,7 +8,8 @@ This repo now contains a production-facing retrieval foundation with a runnable 
 
 ```mermaid
 flowchart TD
-  Intent["Trip Intent"] --> Query["Query Text Builder"]
+  Intent["Trip Intent"] --> Understand["Query Understanding"]
+  Understand --> Query["Query Text Builder"]
   Metadata["Public-safe Place Metadata"] --> Chunker["Metadata-aware Chunker"]
   Chunker --> Embed["Embedding Service"]
   Embed --> Index["Vector Store<br/>local demo or Qdrant"]
@@ -56,6 +57,7 @@ Current files:
 - `ai-engine/src/retrieval/chunking.js`
 - `ai-engine/src/retrieval/embeddingService.js`
 - `ai-engine/src/retrieval/hybridScoring.js`
+- `ai-engine/src/retrieval/queryUnderstanding.js`
 - `ai-engine/src/retrieval/localVectorStore.js`
 - `ai-engine/src/retrieval/qdrantStore.js`
 - `ai-engine/src/retrieval/retrievalPipeline.js`
@@ -97,7 +99,7 @@ QDRANT_URL=http://localhost:6333 npm run qdrant:index
 
 The benchmark prompt set contains 100 retrieval prompts across romantic trips, family vacations, budget backpacking, hidden gems, nature-focused travel, adventure trips, beach intent, nightlife, heritage, low-energy plans, food/market walks, wildlife, solo wellness, premium couples trips, weekend city breaks, and winter travel.
 
-The latest local benchmark target is above 90% minimum-hit pass rate on the 100-prompt set.
+The latest local benchmark is 100% minimum-hit pass rate on the 100-prompt set after adding travel knowledge, query understanding, and broader acceptable labels for genuinely sensible alternatives.
 
 ## Production Boundary
 

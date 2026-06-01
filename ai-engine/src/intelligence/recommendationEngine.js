@@ -1,4 +1,5 @@
 import { enrichedTravelPlaces } from "../datasets/enrichedPlaces.js";
+import { climateFitForIntent } from "../datasets/travelKnowledge.js";
 import { clamp, normalizeText, tokenize } from "../retrieval/textUtils.js";
 
 export const defaultRecommendationWeights = {
@@ -7,7 +8,47 @@ export const defaultRecommendationWeights = {
   budgetFit: 0.16,
   groupFit: 0.14,
   seasonFit: 0.12,
-  tripFit: 0.09
+  tripFit: 0.09,
+  groupSatisfactionFit: 0
+};
+
+export const recommendationWeightProfiles = {
+  solo: {
+    retrievalFit: 0.28,
+    preferenceFit: 0.32,
+    budgetFit: 0.16,
+    groupFit: 0.04,
+    seasonFit: 0.12,
+    tripFit: 0.08,
+    groupSatisfactionFit: 0
+  },
+  couples: {
+    retrievalFit: 0.24,
+    preferenceFit: 0.28,
+    budgetFit: 0.14,
+    groupFit: 0.16,
+    seasonFit: 0.12,
+    tripFit: 0.06,
+    groupSatisfactionFit: 0
+  },
+  family: {
+    retrievalFit: 0.2,
+    preferenceFit: 0.2,
+    budgetFit: 0.14,
+    groupFit: 0.22,
+    seasonFit: 0.14,
+    tripFit: 0.1,
+    groupSatisfactionFit: 0
+  },
+  friends: {
+    retrievalFit: 0.23,
+    preferenceFit: 0.22,
+    budgetFit: 0.14,
+    groupFit: 0.12,
+    seasonFit: 0.09,
+    tripFit: 0.06,
+    groupSatisfactionFit: 0.14
+  }
 };
 
 export function rankDestinationRecommendations({
@@ -16,36 +57,58 @@ export function rankDestinationRecommendations({
   userPreferences = {},
   budgetConstraints = {},
   groupPreferences = {},
+  groupMembers = [],
   tripLengthDays = 3,
   season,
+  month,
+  climatePreference,
   travelStyle = {},
-  weights = defaultRecommendationWeights,
+  weightProfile,
+  weights,
   topK = 10
 } = {}) {
   const placeLookup = new Map(places.map((place) => [place.id, place]));
   const resolvedCandidates = resolveCandidates(candidates, places, placeLookup);
+  const resolvedWeights = resolveRecommendationWeights({ weightProfile, weights, groupPreferences });
 
   return resolvedCandidates
     .map(({ place, retrievalRecord }) => {
+      const groupSatisfaction = calculateGroupSatisfaction(place, groupMembers);
       const breakdown = {
         retrievalFit: retrievalFit(retrievalRecord),
         preferenceFit: preferenceFit(place, { userPreferences, travelStyle }),
         budgetFit: budgetFit(place, budgetConstraints),
         groupFit: groupFit(place, groupPreferences),
-        seasonFit: seasonFit(place, season),
-        tripFit: tripFit(place, tripLengthDays)
+        seasonFit: seasonFit(place, { season, month, climatePreference }),
+        tripFit: tripFit(place, tripLengthDays),
+        groupSatisfactionFit: groupSatisfaction.groupScore
       };
-      const destinationRankingScore = weightedAverage(breakdown, weights);
+      const destinationRankingScore = weightedAverage(breakdown, resolvedWeights);
 
       return {
         ...place,
         destinationRankingScore: Number(destinationRankingScore.toFixed(2)),
         recommendationBreakdown: breakdown,
-        recommendationReasons: explainRecommendation(place, breakdown)
+        groupSatisfaction,
+        recommendationReasons: explainRecommendation(place, breakdown, {
+          groupSatisfaction,
+          season,
+          month,
+          climatePreference
+        })
       };
     })
     .sort((a, b) => b.destinationRankingScore - a.destinationRankingScore)
     .slice(0, topK);
+}
+
+export function resolveRecommendationWeights({ weightProfile, weights, groupPreferences = {} } = {}) {
+  if (weights) return { ...defaultRecommendationWeights, ...weights };
+  const profile = weightProfile || normalizeText(groupPreferences.groupType || groupPreferences.primaryGroup);
+  return {
+    ...defaultRecommendationWeights,
+    ...(recommendationWeightProfiles[profile] || {})
+  };
 }
 
 function resolveCandidates(candidates, places, placeLookup) {
@@ -117,8 +180,12 @@ function groupFit(place, groupPreferences = {}) {
   return 55;
 }
 
-function seasonFit(place, season) {
-  if (!season) return 72;
+function seasonFit(place, { season, month, climatePreference } = {}) {
+  if (!season && !month && !climatePreference) return 72;
+
+  if (month || climatePreference) {
+    return Number((climateFitForIntent(place, { month, climatePreference }) * 100).toFixed(2));
+  }
 
   const requestedMonths = seasonToMonths(season);
   const bestMonths = new Set((place.best_months || []).map(normalizeMonth));
@@ -126,6 +193,45 @@ function seasonFit(place, season) {
 
   if (!requestedMonths.length) return 72;
   return clamp(48 + (matches / requestedMonths.length) * 52, 0, 100);
+}
+
+export function calculateGroupSatisfaction(place, groupMembers = []) {
+  if (!groupMembers.length) {
+    return {
+      groupScore: 72,
+      memberScores: [],
+      fairnessPenalty: 0,
+      conflictLevel: "none"
+    };
+  }
+
+  const memberScores = groupMembers.map((member) => {
+    const score = preferenceFit(place, {
+      userPreferences: {
+        interests: member.interests || [],
+        moods: member.moods || []
+      },
+      travelStyle: member.travelStyle || {}
+    });
+
+    return {
+      memberId: member.id || member.name,
+      score: Number(score.toFixed(2)),
+      matchedPreferences: matchedPreferences(place, member)
+    };
+  });
+
+  const averageScore = memberScores.reduce((sum, member) => sum + member.score, 0) / memberScores.length;
+  const lowestScore = Math.min(...memberScores.map((member) => member.score));
+  const fairnessPenalty = Math.max(0, averageScore - lowestScore) * 0.35;
+  const groupScore = clamp(averageScore - fairnessPenalty, 0, 100);
+
+  return {
+    groupScore: Number(groupScore.toFixed(2)),
+    memberScores,
+    fairnessPenalty: Number(fairnessPenalty.toFixed(2)),
+    conflictLevel: conflictLevel(fairnessPenalty)
+  };
 }
 
 function tripFit(place, tripLengthDays) {
@@ -146,17 +252,42 @@ function weightedAverage(breakdown, weights) {
   ) / totalWeight;
 }
 
-function explainRecommendation(place, breakdown) {
+function explainRecommendation(place, breakdown, { groupSatisfaction, season, month, climatePreference } = {}) {
   const reasons = [];
 
   if (breakdown.preferenceFit >= 82) reasons.push("matches traveler preferences");
   if (breakdown.budgetFit >= 82) reasons.push(`${place.costBand} budget fit`);
   if (breakdown.groupFit >= 82) reasons.push("fits the group");
-  if (breakdown.seasonFit >= 82) reasons.push("strong seasonal fit");
+  if (breakdown.seasonFit >= 82) {
+    if (month && climatePreference) reasons.push(`matches ${month} ${climatePreference} weather`);
+    else if (season) reasons.push(`matches ${season} travel preference`);
+    else reasons.push("strong seasonal fit");
+  }
+  if (groupSatisfaction?.groupScore >= 82) reasons.push("high group satisfaction");
+  if (groupSatisfaction?.conflictLevel === "low") reasons.push("low group conflict");
   if (breakdown.tripFit >= 82) reasons.push("fits trip length");
   if (breakdown.retrievalFit >= 70) reasons.push("strong retrieval match");
 
   return reasons.slice(0, 5);
+}
+
+function matchedPreferences(place, member = {}) {
+  const placeTerms = new Set(tokenize([
+    place.category,
+    ...(place.mood || []),
+    ...(place.best_for || []),
+    ...(place.tags || [])
+  ].join(" ")));
+
+  return [...(member.interests || []), ...(member.moods || [])]
+    .filter((preference) => tokenize(preference).some((term) => placeTerms.has(term)))
+    .slice(0, 5);
+}
+
+function conflictLevel(fairnessPenalty) {
+  if (fairnessPenalty >= 12) return "high";
+  if (fairnessPenalty >= 6) return "medium";
+  return "low";
 }
 
 function seasonToMonths(season) {

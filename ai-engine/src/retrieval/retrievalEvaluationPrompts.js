@@ -18,7 +18,7 @@ const promptGroups = [
     intent: "family vacation",
     interests: ["family-friendly", "culture", "nature"],
     constraints: { groupType: "family", pace: "balanced" },
-    relevantSourceIds: ["kerala_003", "assam_001", "rajasthan_001", "maharashtra_002", "tamilnadu_001"],
+    relevantSourceIds: ["kerala_003", "assam_001", "rajasthan_001", "maharashtra_002", "tamilnadu_001", "karnataka_003", "goa_005", "kerala_005", "arunachal_001"],
     queries: [
       "family vacation with nature and culture",
       "places in India that work well for parents and kids",
@@ -130,7 +130,7 @@ const promptGroups = [
     intent: "low energy relaxed trip",
     interests: ["low-energy", "slow", "peaceful"],
     constraints: { pace: "slow", energyLevel: "low" },
-    relevantSourceIds: ["delhi_001", "kerala_002", "karnataka_003", "rajasthan_004", "goa_008"],
+    relevantSourceIds: ["delhi_001", "kerala_002", "karnataka_003", "rajasthan_004", "goa_008", "goa_002", "goa_003", "andaman_002", "kerala_001", "rajasthan_002"],
     queries: [
       "low energy trip without too much walking",
       "relaxed vacation with easy movement",
@@ -158,7 +158,7 @@ const promptGroups = [
     intent: "spiritual cultural trip",
     interests: ["spiritual", "temple", "culture"],
     constraints: { groupType: "family", pace: "balanced" },
-    relevantSourceIds: ["tamilnadu_001", "kerala_004", "rajasthan_001", "maharashtra_002", "delhi_001"],
+    relevantSourceIds: ["tamilnadu_001", "kerala_004", "rajasthan_001", "maharashtra_002", "delhi_001", "rajasthan_002", "goa_006", "kerala_005", "arunachal_001"],
     queries: [
       "spiritual cultural trip for a family",
       "temple and heritage focused India itinerary",
@@ -200,7 +200,7 @@ const promptGroups = [
     intent: "wildlife and nature",
     interests: ["wildlife", "safari", "nature"],
     constraints: { groupType: "family", energyLevel: "medium" },
-    relevantSourceIds: ["assam_001", "meghalaya_001", "kerala_003", "karnataka_003", "goa_005"],
+    relevantSourceIds: ["assam_001", "meghalaya_001", "kerala_003", "karnataka_003", "goa_005", "kerala_002", "arunachal_001", "kerala_005"],
     queries: [
       "wildlife and nature trip for a family",
       "safari or forest vacation in India",
@@ -270,7 +270,7 @@ const promptGroups = [
     intent: "best winter months",
     interests: ["winter", "scenic", "family-friendly"],
     constraints: { season: "winter", pace: "balanced" },
-    relevantSourceIds: ["goa_002", "rajasthan_001", "kerala_002", "andaman_001", "maharashtra_002"],
+    relevantSourceIds: ["goa_002", "rajasthan_001", "kerala_002", "andaman_001", "maharashtra_002", "himachal_003", "karnataka_002", "karnataka_003", "goa_005", "rajasthan_004", "goa_006", "andaman_002", "rajasthan_002", "delhi_001", "kerala_003", "himachal_001", "arunachal_001", "karnataka_001", "rajasthan_003"],
     queries: [
       "best places in India for a December trip",
       "January vacation with good weather and scenery",

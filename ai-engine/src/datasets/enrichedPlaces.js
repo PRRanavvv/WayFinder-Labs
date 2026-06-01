@@ -1,3 +1,5 @@
+import { getTravelKnowledgeForPlace } from "./travelKnowledge.js";
+
 export const requiredEnrichedPlaceFields = [
   "id",
   "name",
@@ -751,11 +753,14 @@ export function validateEnrichedPlace(place) {
 }
 
 function createPlace(input) {
+  const travelKnowledge = getTravelKnowledgeForPlace(input);
   const costBand = budgetBand(input.budget_level);
   const tags = unique([
     input.category.toLowerCase(),
     ...input.mood,
     ...input.ideal_for,
+    ...(travelKnowledge.best_for || []),
+    ...(travelKnowledge.climate_tags || []),
     ...input.retrieval_terms,
     costBand,
     crowdBand(input.crowd_level),
@@ -766,6 +771,12 @@ function createPlace(input) {
     ...input,
     country: input.country || "India",
     destination: input.city,
+    avg_temp_monthly: input.avg_temp_monthly || travelKnowledge.avg_temp_monthly,
+    peak_season: input.peak_season || travelKnowledge.peak_season,
+    monsoon_months: input.monsoon_months || travelKnowledge.monsoon_months,
+    climate_tags: input.climate_tags || travelKnowledge.climate_tags,
+    seasonal_notes: input.seasonal_notes || travelKnowledge.seasonal_notes,
+    best_for: unique([...(input.best_for || []), ...input.ideal_for, ...(travelKnowledge.best_for || [])]),
     type: input.category.toLowerCase().replace(/\s+/g, "_"),
     role: input.role || inferRole(input),
     cluster: input.cluster || input.city,
@@ -790,12 +801,16 @@ function createPlace(input) {
 }
 
 function buildSemanticSummary(place) {
+  const travelKnowledge = getTravelKnowledgeForPlace(place);
   return [
     `${place.name} is a ${place.category.toLowerCase()} in ${place.city}, ${place.country || "India"}.`,
     `Mood: ${place.mood.join(", ")}.`,
     `Ideal for: ${place.ideal_for.join(", ")}.`,
     `Budget level ${place.budget_level}/5; crowd level ${place.crowd_level}/5; walking required ${place.walking_required}/5.`,
     `Best months: ${place.best_months.join(", ")}.`,
+    `Peak season: ${(place.peak_season || travelKnowledge.peak_season || []).join(", ")}.`,
+    `Monsoon months: ${(place.monsoon_months || travelKnowledge.monsoon_months || []).join(", ")}.`,
+    `Climate tags: ${(place.climate_tags || travelKnowledge.climate_tags || []).join(", ")}.`,
     `Nightlife ${place.nightlife_score}/5, adventure ${place.adventure_score}/5, culture ${place.cultural_score}/5.`,
     place.summary
   ].join(" ");

@@ -115,6 +115,10 @@ function buildRecordSignals(metadata = {}) {
     ...(metadata.idealFor || []),
     ...(metadata.bestFor || []),
     ...(metadata.bestMonths || []),
+    ...(metadata.peakSeason || []),
+    ...(metadata.monsoonMonths || []),
+    ...(metadata.climateTags || []),
+    ...(metadata.seasonalNotes || []),
     ...(metadata.dayWindows || [])
   ];
 
@@ -144,6 +148,8 @@ function buildRecordSignals(metadata = {}) {
   if ([...winterMonthSignals].some((month) => signals.has(month))) {
     signals.add("winter");
   }
+  if (Object.values(metadata.avgTempMonthly || {}).some((temp) => temp <= 24)) signals.add("cool-weather");
+  if (Object.values(metadata.avgTempMonthly || {}).some((temp) => temp >= 32)) signals.add("hot-weather");
 
   return signals;
 }
@@ -170,7 +176,8 @@ function buildQuerySignals({ query, interests = [], constraints = {} }) {
   addSignalIf(signals, sourceTokens, ["nightlife", "party", "bars"], "nightlife", "nightlife", 0.12);
   addSignalIf(signals, sourceTokens, ["adventure", "active", "trek", "rafting"], "adventure", "adventure", 0.12);
   addSignalIf(signals, sourceTokens, ["nature", "green", "forest", "wildlife"], "nature", "nature", 0.11);
-  addSignalIf(signals, sourceTokens, ["hill", "hills", "mountain", "mountains", "cool", "climate"], "mountain", "cool hills", 0.12);
+  addSignalIf(signals, sourceTokens, ["hill", "hills", "mountain", "mountains"], "mountain", "cool hills", 0.12);
+  addSignalIf(signals, sourceTokens, ["cool", "pleasant", "climate", "weather"], "cool-weather", "cool weather", 0.14);
   addSignalIf(signals, sourceTokens, ["heritage", "historic", "history", "architecture", "old-city"], "heritage", "heritage", 0.12);
   addSignalIf(signals, sourceTokens, ["culture", "cultural", "temple", "spiritual"], "culture", "culture", 0.11);
   addSignalIf(signals, sourceTokens, ["food", "foodie", "market", "cafes", "snacks"], "food", "food and markets", 0.14);
@@ -214,6 +221,24 @@ function hardConstraintBoosts({ metadata, constraints = {}, query, reasons, matc
     addReason(reasons, "best in winter");
   }
 
+  if (constraints.month && constraints.climatePreference) {
+    const climateFit = climateFitForMonth(metadata, {
+      month: constraints.month,
+      climatePreference: constraints.climatePreference
+    });
+    boost += climateFit * 0.16;
+    if (climateFit >= 0.75) {
+      matchedSignals.push(`climate:${constraints.month}:${constraints.climatePreference}`);
+      addReason(reasons, `${constraints.month} ${constraints.climatePreference} weather`);
+    }
+  }
+
+  if (constraints.month && (metadata.peakSeason || []).map(normalizeToken).includes(normalizeToken(constraints.month))) {
+    boost += 0.08;
+    matchedSignals.push(`peak:${constraints.month}`);
+    addReason(reasons, `${constraints.month} peak season`);
+  }
+
   if (constraints.energyLevel === "low" && metadata.walkingRequired <= 2) {
     boost += 0.08;
     matchedSignals.push("constraint:low-energy");
@@ -250,6 +275,10 @@ function metadataText(metadata = {}) {
     metadata.role,
     metadata.cluster,
     metadata.costBand,
+    ...(metadata.climateTags || []),
+    ...(metadata.peakSeason || []),
+    ...(metadata.monsoonMonths || []),
+    ...(metadata.seasonalNotes || []),
     ...(metadata.tags || []),
     ...(metadata.mood || []),
     ...(metadata.idealFor || []),
@@ -297,6 +326,28 @@ function matchesAny(values = [], expected = []) {
 
 function hasWinterMonth(months = []) {
   return months.map(monthToSignal).some((month) => winterMonthSignals.has(month));
+}
+
+function climateFitForMonth(metadata = {}, { month, climatePreference } = {}) {
+  const temp = metadata.avgTempMonthly?.[normalizeToken(month)];
+  if (typeof temp !== "number") return 0.35;
+
+  if (climatePreference === "cool") {
+    if (temp <= 24) return 1;
+    if (temp <= 28) return 0.7;
+    if (temp <= 32) return 0.35;
+    return 0.05;
+  }
+
+  if (climatePreference === "warm") {
+    if (temp >= 24 && temp <= 32) return 1;
+    if (temp > 32) return 0.72;
+    return 0.4;
+  }
+
+  if (temp >= 15 && temp <= 28) return 1;
+  if (temp > 28 && temp <= 32) return 0.65;
+  return 0.4;
 }
 
 function monthToSignal(month) {

@@ -42,9 +42,21 @@ import {
   rankCandidates
 } from "./intelligence/rankingEngine.js";
 import {
+  calculateGroupSatisfaction,
   defaultRecommendationWeights,
-  rankDestinationRecommendations
+  rankDestinationRecommendations,
+  recommendationWeightProfiles,
+  resolveRecommendationWeights
 } from "./intelligence/recommendationEngine.js";
+import {
+  climateFitForIntent,
+  destinationTravelKnowledge,
+  temperatureForMonth
+} from "./datasets/travelKnowledge.js";
+import {
+  extractTravelIntent,
+  mergeIntentIntoRetrievalInput
+} from "./retrieval/queryUnderstanding.js";
 import {
   runDecisionQualityFlow,
   runIntelligenceFlow
@@ -98,9 +110,12 @@ export {
   defaultRecommendationWeights,
   defaultScoringWeights,
   defaultRetrievalBenchmarkCases,
+  destinationTravelKnowledge,
   applyCandidateToDayState,
   buildDecisionTrace,
   bgeSmallEmbeddingConfig,
+  calculateGroupSatisfaction,
+  climateFitForIntent,
   createBgeSmallEmbeddingService,
   LocalVectorStore,
   normalizeWeights,
@@ -110,6 +125,8 @@ export {
   rankDestinationRecommendations,
   rankPlaces,
   rankCandidates,
+  recommendationWeightProfiles,
+  resolveRecommendationWeights,
   runDecisionQualityFlow,
   runIntelligenceFlow,
   runRetrievalBenchmark,
@@ -117,11 +134,14 @@ export {
   evaluateDecisionQuality,
   explainHybridMatch,
   explainOptimizedActivity,
+  extractTravelIntent,
+  mergeIntentIntoRetrievalInput,
   retrievePlaces,
   scoreTravelCandidate,
   scoreHybridRecord,
   scoringDimensions,
   scoringProfiles,
+  temperatureForMonth,
   enrichedTravelPlaces,
   requiredEnrichedPlaceFields,
   retrievalEvaluationCases,

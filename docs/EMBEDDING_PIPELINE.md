@@ -26,6 +26,8 @@ flowchart TD
 | pgvector adapter | `ai-engine/src/retrieval/pgvectorStore.js` |
 | Retrieval pipeline | `ai-engine/src/retrieval/retrievalPipeline.js` |
 | Enriched place dataset | `ai-engine/src/datasets/enrichedPlaces.js` |
+| Travel knowledge layer | `ai-engine/src/datasets/travelKnowledge.js` |
+| Query understanding | `ai-engine/src/retrieval/queryUnderstanding.js` |
 | Retrieval eval prompts | `ai-engine/src/retrieval/retrievalEvaluationPrompts.js` |
 
 ## Embedding Provider Boundary

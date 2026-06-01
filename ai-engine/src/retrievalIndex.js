@@ -19,6 +19,10 @@ export function buildRetrievalIndex({ places = demoPlaces } = {}) {
         mood: place.mood || [],
         idealFor: place.ideal_for || place.bestFor || [],
         budgetLevel: place.budget_level,
+        avgTempMonthly: place.avg_temp_monthly || {},
+        peakSeason: place.peak_season || [],
+        monsoonMonths: place.monsoon_months || [],
+        climateTags: place.climate_tags || [],
         crowdLevel: place.crowd_level,
         walkingRequired: place.walking_required,
         familyFriendly: place.family_friendly,
@@ -80,7 +84,12 @@ export function buildEmbeddingText(place) {
     ...(place.tags || []),
     ...(place.mood || []),
     ...(place.ideal_for || []),
+    ...(place.best_for || []),
     ...(place.best_months || []),
+    ...(place.peak_season || []),
+    ...(place.monsoon_months || []),
+    ...(place.climate_tags || []),
+    monthlyTemperatureText(place.avg_temp_monthly),
     ...(place.bestFor || []),
     ...(place.dayWindows || place.day_windows || []),
     ...(place.retrievalTerms || place.retrieval_terms || [])
@@ -180,6 +189,12 @@ function scoreText(label, score) {
   if (score >= 4) return `high ${label}`;
   if (score <= 1) return `low ${label}`;
   return `moderate ${label}`;
+}
+
+function monthlyTemperatureText(avgTempMonthly = {}) {
+  return Object.entries(avgTempMonthly)
+    .map(([month, temp]) => `${month} average temperature ${temp}C`)
+    .join(" ");
 }
 
 function vectorize(text) {
