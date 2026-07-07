@@ -13,6 +13,8 @@
     "qdrant:index": "node scripts/indexQdrant.js",
     "benchmark:retrieval": "node scripts/benchmarkRetrieval.js",
     "benchmark:retrieval:hard": "node scripts/benchmarkHardRetrieval.js",
+    "benchmark:itinerary": "node scripts/benchmarkItinerary.js",
+    "benchmark:edge-cases": "node scripts/benchmarkProductionEdgeCases.js",
     "analyze:retrieval-failures": "node scripts/analyzeRetrievalFailures.js",
     "analyze:benchmark-leakage": "node scripts/analyzeBenchmarkLeakage.js",
     "test:retrieval": "node tests/retrieval.test.js",
@@ -20,7 +22,10 @@
     "test:intelligence": "node tests/intelligenceFlow.test.js",
     "test:decision-quality": "node tests/decisionQuality.test.js",
     "test:itinerary": "node tests/itineraryPlanner.test.js",
-    "test:recommendations": "node tests/recommendationEngine.test.js"
+    "test:itinerary:benchmark": "node tests/itineraryBenchmark.test.js",
+    "test:edge-cases": "node tests/productionEdgeCases.test.js",
+    "test:recommendations": "node tests/recommendationEngine.test.js",
+    "test:group-intelligence": "node tests/groupIntelligence.test.js"
   },
   "optionalDependencies": {
     "@huggingface/transformers": "^3.8.1",

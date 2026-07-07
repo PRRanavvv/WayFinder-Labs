@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  assessSeasonalFit,
   enrichedTravelPlaces,
   planDeterministicItinerary,
   replanDeterministicItinerary,
@@ -110,6 +111,76 @@ assert.ok(walkingHeavyPlan.days[0].totalFatigue <= walkingHeavyPlan.constraints.
 assert.ok(walkingHeavyPlan.days[0].totalWalkingHours <= walkingHeavyPlan.constraints.maxDailyWalkingHours);
 assert.ok(walkingHeavyPlan.skippedCandidates.some((candidate) => candidate.reason.includes("max fatigue")));
 
+const rainyPlan = planDeterministicItinerary({
+  destination: "Testland",
+  days: 1,
+  budget: 10000,
+  group: { adults: 2 },
+  weather: {
+    "Test City": {
+      condition: "heavy rain"
+    }
+  },
+  places: [
+    makeTestPlace({
+      id: "outdoor_view",
+      name: "Outdoor View",
+      category: "Viewpoint",
+      indoorOutdoor: "outdoor",
+      clusterPriority: 100,
+      travelType: "walking"
+    }),
+    makeTestPlace({
+      id: "indoor_museum",
+      name: "Indoor Museum",
+      category: "Museum",
+      indoorOutdoor: "indoor",
+      clusterPriority: 70,
+      travelType: "mixed",
+      fatigueScore: 1,
+      walking_required: 1
+    })
+  ]
+});
+
+assert.equal(rainyPlan.day1.find((activity) => activity.kind === "place").name, "Indoor Museum");
+assert.ok(rainyPlan.realtimeInsights.impactedPlaces.some((place) => place.name === "Outdoor View"));
+assert.ok(rainyPlan.realtimeInsights.alternatives.some((item) => item.for === "Outdoor View"));
+
+const liveHoursPlan = planDeterministicItinerary({
+  destination: "Testland",
+  days: 1,
+  budget: 10000,
+  group: { adults: 2 },
+  openingHours: {
+    closed_stop: {
+      closed: true,
+      source: "mock-places-api"
+    }
+  },
+  places: [
+    makeTestPlace({
+      id: "closed_stop",
+      name: "Closed By API",
+      clusterPriority: 100
+    }),
+    makeTestPlace({
+      id: "api_open_stop",
+      name: "Open By API",
+      clusterPriority: 60
+    })
+  ]
+});
+
+assert.equal(liveHoursPlan.day1.find((activity) => activity.kind === "place").name, "Open By API");
+assert.ok(liveHoursPlan.skippedCandidates.some((candidate) => (
+  candidate.name === "Closed By API" && candidate.reason.includes("live opening-hours")
+)));
+
+const manaliPlace = enrichedTravelPlaces.find((place) => place.id === "himachal_003");
+assert.ok(assessSeasonalFit(manaliPlace, "Dec").scoreAdjustment >= 15);
+assert.ok(assessSeasonalFit(manaliPlace, "Jul").scoreAdjustment <= -20);
+
 const replanned = replanDeterministicItinerary({
   itineraryInput: {
     destination: "Kerala",
@@ -129,6 +200,26 @@ const replanned = replanDeterministicItinerary({
 assert.equal(replanned.days.length, 3);
 assert.equal(replanned.constraints.weatherMode, "rain");
 assert.equal(replanned.feasibility.valid, true);
+
+const tiredReplan = replanDeterministicItinerary({
+  itineraryInput: {
+    destination: "Kerala",
+    days: 4,
+    budget: 50000,
+    group: {
+      adults: 2,
+      parents: true
+    }
+  },
+  changes: {
+    parentsTired: true,
+    flightDelayHours: 5
+  }
+});
+
+assert.equal(tiredReplan.constraints.maxActivitiesPerDay, 1);
+assert.equal(tiredReplan.days[0].dayStartTime, "14:30");
+assert.ok(tiredReplan.feasibility.valid);
 
 console.log("Itinerary planner tests passed");
 

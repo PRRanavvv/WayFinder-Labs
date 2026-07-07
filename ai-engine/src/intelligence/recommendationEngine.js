@@ -1,6 +1,7 @@
 import { enrichedTravelPlaces } from "../datasets/enrichedPlaces.js";
 import { climateFitForIntent } from "../datasets/travelKnowledge.js";
 import { clamp, normalizeText, tokenize } from "../retrieval/textUtils.js";
+import { calculateConfidence } from "./confidenceScoring.js";
 
 export const defaultRecommendationWeights = {
   retrievalFit: 0.25,
@@ -65,13 +66,18 @@ export function rankDestinationRecommendations({
   travelStyle = {},
   weightProfile,
   weights,
+  visitedDestinations = [],
+  excludedDestinations = [],
+  diversityControls = {},
   topK = 10
 } = {}) {
   const placeLookup = new Map(places.map((place) => [place.id, place]));
-  const resolvedCandidates = resolveCandidates(candidates, places, placeLookup);
+  const excluded = new Set([...visitedDestinations, ...excludedDestinations].map(normalizeText));
+  const resolvedCandidates = resolveCandidates(candidates, places, placeLookup)
+    .filter(({ place }) => !excluded.has(normalizeText(place.destination || place.city || place.name)));
   const resolvedWeights = resolveRecommendationWeights({ weightProfile, weights, groupPreferences });
 
-  return resolvedCandidates
+  return applyDiversityControls(resolvedCandidates
     .map(({ place, retrievalRecord }) => {
       const groupSatisfaction = calculateGroupSatisfaction(place, groupMembers);
       const breakdown = {
@@ -84,10 +90,17 @@ export function rankDestinationRecommendations({
         groupSatisfactionFit: groupSatisfaction.groupScore
       };
       const destinationRankingScore = weightedAverage(breakdown, resolvedWeights);
+      const confidenceReport = calculateConfidence({
+        base: destinationRankingScore / 100,
+        retrievalScore: breakdown.retrievalFit,
+        groupConflictLevel: groupSatisfaction.conflictLevel === "high" ? "high" : "none",
+        sparseData: !retrievalRecord && Boolean(candidates?.length)
+      });
 
       return {
         ...place,
         destinationRankingScore: Number(destinationRankingScore.toFixed(2)),
+        ...confidenceReport,
         recommendationBreakdown: breakdown,
         groupSatisfaction,
         recommendationReasons: explainRecommendation(place, breakdown, {
@@ -98,8 +111,10 @@ export function rankDestinationRecommendations({
         })
       };
     })
-    .sort((a, b) => b.destinationRankingScore - a.destinationRankingScore)
-    .slice(0, topK);
+    .sort((a, b) => b.destinationRankingScore - a.destinationRankingScore), {
+      topK,
+      maxPerDestination: diversityControls.maxPerDestination
+    });
 }
 
 export function resolveRecommendationWeights({ weightProfile, weights, groupPreferences = {} } = {}) {
@@ -123,6 +138,24 @@ function resolveCandidates(candidates, places, placeLookup) {
       return { place, retrievalRecord: candidate.sourceId ? candidate : null };
     })
     .filter(({ place }) => place?.id);
+}
+
+function applyDiversityControls(rankedPlaces, { topK, maxPerDestination } = {}) {
+  if (!maxPerDestination) return rankedPlaces.slice(0, topK);
+
+  const counts = new Map();
+  const diversified = [];
+
+  for (const place of rankedPlaces) {
+    const destination = normalizeText(place.destination || place.city || place.name);
+    const count = counts.get(destination) || 0;
+    if (count >= maxPerDestination) continue;
+    counts.set(destination, count + 1);
+    diversified.push(place);
+    if (diversified.length >= topK) break;
+  }
+
+  return diversified;
 }
 
 function retrievalFit(record) {

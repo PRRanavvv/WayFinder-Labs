@@ -81,9 +81,32 @@ import {
   evaluateCandidateConstraints,
   validateOptimizedItinerary
 } from "./intelligence/constraintEngine.js";
-import { buildDecisionTrace, explainOptimizedActivity } from "./intelligence/explanationEngine.js";
+import {
+  buildDecisionTrace,
+  explainGroupPreferenceFusion,
+  explainOptimizedActivity,
+  explainRecommendationSelection,
+  explainStableReplan
+} from "./intelligence/explanationEngine.js";
+import {
+  buildTripDNA,
+  defaultGroupFusionWeights,
+  fuseGroupPreferences,
+  scorePlaceAgainstTripDNA
+} from "./intelligence/groupPreferenceFusion.js";
 import { optimizeItinerary } from "./intelligence/optimizationEngine.js";
 import { evaluateDecisionQuality } from "./intelligence/evaluationMetrics.js";
+import { calculateConfidence } from "./intelligence/confidenceScoring.js";
+import {
+  analyzeProductionInput,
+  assessGroupPlanningEdges,
+  detectBudgetConflict,
+  detectImpossibleRequests,
+  detectMissingTripInfo,
+  detectPreferenceConflicts,
+  resolveLocationMention,
+  validateExplanationReasons
+} from "./intelligence/productionGuards.js";
 import {
   buildDeterministicItinerary,
   defaultItineraryPlannerConfig,
@@ -92,10 +115,30 @@ import {
   validateDeterministicItinerary
 } from "./itinerary/deterministicPlanner.js";
 import {
+  buildStabilityReport,
+  replanWithStability,
+  stabilizeItinerary
+} from "./itinerary/stabilityEngine.js";
+import {
+  applyRealtimeIntelligence,
+  assessSeasonalFit,
+  assessWeatherImpact,
+  buildRealtimeContext,
+  buildRealtimeInsights
+} from "./itinerary/realtimeIntelligence.js";
+import {
   destinationRegionProfiles,
   estimateTravelMinutes,
   optimizeRouteOrder
 } from "./itinerary/travelGraph.js";
+import {
+  itineraryBenchmarkScenarios,
+  runItineraryBenchmark
+} from "./itinerary/itineraryBenchmark.js";
+import {
+  productionEdgeCaseScenarios,
+  runProductionEdgeCaseBenchmark
+} from "./evaluation/productionEdgeCases.js";
 export {
   default as globalDestinationPlaceIntelligence,
   destinationProfiles as globalDestinationProfiles
@@ -114,6 +157,8 @@ export {
   buildRetrievalQueryText,
   buildRetrievalIndex,
   buildRetrievalRecords,
+  buildStabilityReport,
+  buildTripDNA,
   buildTravelMetadataChunks,
   createEmbeddingService,
   createDecisionLog,
@@ -124,6 +169,7 @@ export {
   createWayfinderRetrievalPipeline,
   defaultConstraintConfig,
   defaultDecisionWeights,
+  defaultGroupFusionWeights,
   defaultHybridRetrievalWeights,
   defaultItineraryPlannerConfig,
   defaultRecommendationWeights,
@@ -133,11 +179,18 @@ export {
   destinationTravelKnowledge,
   hardRetrievalEvaluationCases,
   hardRetrievalEvaluationPrompts,
+  itineraryBenchmarkScenarios,
   applyCandidateToDayState,
+  applyRealtimeIntelligence,
+  assessSeasonalFit,
+  assessWeatherImpact,
   analyzeBenchmarkLeakage,
   buildDecisionTrace,
   bgeSmallEmbeddingConfig,
+  calculateConfidence,
   calculateGroupSatisfaction,
+  buildRealtimeContext,
+  buildRealtimeInsights,
   climateFitForIntent,
   createBgeSmallEmbeddingService,
   LocalVectorStore,
@@ -152,22 +205,39 @@ export {
   rankCandidates,
   recommendationWeightProfiles,
   replanDeterministicItinerary,
+  replanWithStability,
   resolveRecommendationWeights,
   runDecisionQualityFlow,
   runIntelligenceFlow,
+  runItineraryBenchmark,
   runRetrievalBenchmark,
   evaluateCandidateConstraints,
   evaluateDecisionQuality,
   estimateTravelMinutes,
+  explainGroupPreferenceFusion,
   explainHybridMatch,
   explainOptimizedActivity,
+  explainRecommendationSelection,
+  explainStableReplan,
   extractTravelIntent,
+  fuseGroupPreferences,
+  analyzeProductionInput,
+  assessGroupPlanningEdges,
+  detectBudgetConflict,
+  detectImpossibleRequests,
+  detectMissingTripInfo,
+  detectPreferenceConflicts,
   mergeIntentIntoRetrievalInput,
+  productionEdgeCaseScenarios,
+  resolveLocationMention,
   retrievePlaces,
+  runProductionEdgeCaseBenchmark,
+  scorePlaceAgainstTripDNA,
   scoreTravelCandidate,
   scoreHybridRecord,
   scoringDimensions,
   scoringProfiles,
+  stabilizeItinerary,
   temperatureForMonth,
   enrichedTravelPlaces,
   requiredEnrichedPlaceFields,
@@ -176,6 +246,7 @@ export {
   updatePreferenceProfile,
   validateEnrichedPlace,
   validateDeterministicItinerary,
+  validateExplanationReasons,
   validateOptimizedItinerary,
   validateChunks
 };

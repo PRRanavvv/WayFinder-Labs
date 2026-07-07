@@ -1,4 +1,5 @@
 import { enrichedTravelPlaces } from "../datasets/enrichedPlaces.js";
+import { calculateConfidence } from "../intelligence/confidenceScoring.js";
 import { clamp, normalizeText } from "../retrieval/textUtils.js";
 import {
   estimateTravelMinutes,
@@ -6,6 +7,11 @@ import {
   placeMatchesDestination,
   resolveDestinationProfile
 } from "./travelGraph.js";
+import {
+  applyRealtimeIntelligence,
+  buildRealtimeContext,
+  buildRealtimeInsights
+} from "./realtimeIntelligence.js";
 
 export const defaultItineraryPlannerConfig = {
   dayStartTime: "09:00",
@@ -35,12 +41,24 @@ export function planDeterministicItinerary({
   group = {},
   preferences = {},
   weather,
+  month,
+  date,
+  openingHours = {},
+  realtimeSignals = {},
+  scheduleAdjustments = {},
   places = enrichedTravelPlaces,
   blockedPlaceIds = [],
   config = {}
 } = {}) {
   const plannerConfig = { ...defaultItineraryPlannerConfig, ...config };
   const normalizedDays = Math.max(1, Math.floor(Number(days) || 1));
+  const realtimeContext = buildRealtimeContext({
+    weather,
+    openingHours,
+    month,
+    date,
+    realtimeSignals
+  });
   const constraints = deriveTripConstraints({
     destination,
     days: normalizedDays,
@@ -48,6 +66,8 @@ export function planDeterministicItinerary({
     group,
     preferences,
     weather,
+    month: realtimeContext.month,
+    scheduleAdjustments,
     config: plannerConfig
   });
   const blockedIds = new Set(blockedPlaceIds);
@@ -55,6 +75,7 @@ export function planDeterministicItinerary({
     .filter((place) => !blockedIds.has(place.id))
     .filter((place) => placeMatchesDestination(place, destination))
     .filter((place) => isHardGroupCompatible(place, constraints))
+    .map((place) => applyRealtimeIntelligence(place, realtimeContext, constraints))
     .map((place) => ({
       ...place,
       itineraryScore: scoreItineraryPlace(place, constraints)
@@ -94,8 +115,12 @@ export function planDeterministicItinerary({
 
   const route = buildRouteSummary(plannedDays, { destination });
   const totals = calculateItineraryTotals(plannedDays);
+  const plannerStatus = totals.scheduledPlaceCount > 0
+    ? "feasible"
+    : "no_optimal_itinerary_available";
   const itinerary = {
     stage: "itinerary-intelligence-v1",
+    plannerStatus,
     destination,
     generatedAt: new Date().toISOString(),
     input: {
@@ -104,13 +129,20 @@ export function planDeterministicItinerary({
       budget,
       group,
       preferences,
-      weather
+      weather,
+      month: realtimeContext.month,
+      date
     },
     constraints,
     route,
     days: plannedDays,
     ...buildDayAliases(plannedDays),
     totals,
+    realtimeInsights: buildRealtimeInsights({
+      candidates,
+      plannedDays,
+      constraints
+    }),
     skippedCandidates,
     decisionTrace,
     notes: [
@@ -118,10 +150,29 @@ export function planDeterministicItinerary({
       "LLMs can explain or refine this schedule later, but constraints own the plan."
     ]
   };
+  const feasibility = validateDeterministicItinerary(itinerary);
+  const daysWithScheduledPlaces = plannedDays
+    .filter((day) => day.activities.some((activity) => activity.kind === "place"))
+    .length;
+  const targetPlaceCoverage = normalizedDays
+    ? totals.scheduledPlaceCount / Math.max(1, Math.min(normalizedDays, 3))
+    : 1;
+  const dayCoverage = normalizedDays
+    ? daysWithScheduledPlaces / normalizedDays
+    : 1;
+  const confidenceReport = calculateConfidence({
+    base: totals.scheduledPlaceCount > 0 ? 0.86 : 0.42,
+    feasible: feasibility.valid && totals.scheduledPlaceCount > 0,
+    fallbackWarnings: realtimeContext.warnings,
+    sparseData: candidates.length < Math.min(normalizedDays, 2),
+    outputCompleteness: Math.min(1, targetPlaceCoverage, dayCoverage),
+    dataCoverage: realtimeContext.warnings.length ? 0.7 : 1
+  });
 
   return {
     ...itinerary,
-    feasibility: validateDeterministicItinerary(itinerary)
+    feasibility,
+    ...confidenceReport
   };
 }
 
@@ -141,20 +192,55 @@ export function replanDeterministicItinerary({
     ...(changes.blockedPlaceIds || [])
   ];
   const weather = changes.weather || itineraryInput.weather;
+  const group = {
+    ...(itineraryInput.group || {}),
+    ...(changes.group || {})
+  };
   const preferences = {
     ...(itineraryInput.preferences || {}),
     ...(changes.preferences || {})
+  };
+  const scheduleAdjustments = {
+    ...(itineraryInput.scheduleAdjustments || {}),
+    ...(changes.scheduleAdjustments || {})
   };
 
   if (normalizeText(weather?.condition || weather) === "rain") {
     preferences.indoorBias = true;
   }
+  if (changes.parentsTired) {
+    group.parents = true;
+    preferences.fatigueMode = "tired";
+    preferences.compressRemaining = true;
+  }
+  if (changes.flightDelayHours || changes.flightDelayMinutes) {
+    const delayMinutes = Math.round((changes.flightDelayHours || 0) * 60 + (changes.flightDelayMinutes || 0));
+    const baseStart = group.parents
+      ? defaultItineraryPlannerConfig.parentDayStartTime
+      : defaultItineraryPlannerConfig.dayStartTime;
+    scheduleAdjustments.dayStartOverrides = {
+      ...(scheduleAdjustments.dayStartOverrides || {}),
+      1: fromMinutes(toMinutes(baseStart) + delayMinutes)
+    };
+    preferences.compressRemaining = true;
+  }
 
   return planDeterministicItinerary({
     ...itineraryInput,
     days: nextDays,
+    group,
     preferences,
     weather,
+    month: changes.month || itineraryInput.month,
+    openingHours: {
+      ...(itineraryInput.openingHours || {}),
+      ...(changes.openingHours || {})
+    },
+    realtimeSignals: {
+      ...(itineraryInput.realtimeSignals || {}),
+      ...(changes.realtimeSignals || {})
+    },
+    scheduleAdjustments,
     blockedPlaceIds,
     places
   });
@@ -206,26 +292,50 @@ export function validateDeterministicItinerary(itinerary = {}) {
   };
 }
 
-function deriveTripConstraints({ destination, days, budget, group, preferences, weather, config }) {
+function deriveTripConstraints({
+  destination,
+  days,
+  budget,
+  group,
+  preferences,
+  weather,
+  month,
+  scheduleAdjustments = {},
+  config
+}) {
   const travelerType = resolveTravelerType(group, preferences);
   const groupSize = Math.max(1, Number(group.adults || 1) + Number(group.children || 0));
   const costMultiplier = Math.min(groupSize, config.groupCostMultiplierCap);
   const dailyBudgetCap = budget ? Math.round(Number(budget) / days) : Infinity;
+  const fatigueMode = normalizeText(preferences.fatigueMode);
+  const maxDailyFatigue = fatigueMode === "tired"
+    ? Math.max(3, resolveMaxFatigue(travelerType, config) - 2)
+    : resolveMaxFatigue(travelerType, config);
+  const maxDailyWalkingHours = fatigueMode === "tired"
+    ? Math.max(1.5, resolveMaxWalkingHours(travelerType, config) - 1.4)
+    : resolveMaxWalkingHours(travelerType, config);
+  const maxActivitiesPerDay = preferences.compressRemaining
+    ? Math.max(1, Math.min(resolveMaxActivitiesPerDay(travelerType, config), travelerType === "parents" ? 1 : 2))
+    : resolveMaxActivitiesPerDay(travelerType, config);
 
   return {
     destination,
     days,
+    month,
+    season: preferences.season,
     totalBudget: budget ?? null,
     dailyBudgetCap,
     group,
     groupSize,
     costMultiplier,
     travelerType,
-    maxDailyFatigue: resolveMaxFatigue(travelerType, config),
-    maxDailyWalkingHours: resolveMaxWalkingHours(travelerType, config),
-    maxActivitiesPerDay: resolveMaxActivitiesPerDay(travelerType, config),
+    maxDailyFatigue,
+    maxDailyWalkingHours,
+    maxActivitiesPerDay,
     dayStartTime: travelerType === "parents" ? config.parentDayStartTime : config.dayStartTime,
     dayEndTime: travelerType === "parents" ? config.parentDayEndTime : config.dayEndTime,
+    dayStartOverrides: scheduleAdjustments.dayStartOverrides || {},
+    dayEndOverrides: scheduleAdjustments.dayEndOverrides || {},
     transferBufferMinutes: config.transferBufferMinutes,
     intraLocationTransferMinutes: config.intraLocationTransferMinutes,
     earlyTransferStartTime: config.earlyTransferStartTime,
@@ -284,6 +394,7 @@ function scoreItineraryPlace(place, constraints) {
   score -= budgetPressure > 1 ? 40 : 0;
   score -= place.walking_required >= 4 ? 8 : 0;
   score -= weatherPenalty(place, constraints);
+  score += place.realtimeScoreAdjustment || 0;
   score += preferenceBonus(place, constraints.preferences);
 
   return Number(clamp(score, 0, 100).toFixed(2));
@@ -309,6 +420,7 @@ function preferenceBonus(place, preferences = {}) {
 }
 
 function weatherPenalty(place, constraints) {
+  if (place.realtime?.weatherAssessment) return 0;
   if (constraints.weatherMode !== "rain" && !constraints.preferences.indoorBias) return 0;
   if (place.indoorOutdoor === "indoor") return -8;
   if (place.travelType === "walking" && place.fatigueScore >= 4) return 18;
@@ -363,8 +475,9 @@ function planSingleDay({
   skippedCandidates,
   decisionTrace
 }) {
-  const dayStartMinutes = toMinutes(constraints.dayStartTime);
-  const dayEndMinutes = toMinutes(constraints.dayEndTime);
+  const dayStartTime = resolveDayStartTime(dayNumber, constraints);
+  const dayEndTime = resolveDayEndTime(dayNumber, constraints);
+  const dayStartMinutes = toMinutes(dayStartTime);
   const state = {
     currentMinutes: dayStartMinutes,
     totalCost: 0,
@@ -395,7 +508,8 @@ function planSingleDay({
       place: candidate,
       routeLocation,
       state,
-      constraints
+      constraints,
+      dayEndTime
     });
 
     if (!attempt.feasible) {
@@ -427,8 +541,8 @@ function planSingleDay({
     day: dayNumber,
     title: `Day ${dayNumber}`,
     routeLocation,
-    dayStartTime: constraints.dayStartTime,
-    dayEndTime: constraints.dayEndTime,
+    dayStartTime,
+    dayEndTime,
     totalCost: state.totalCost,
     totalFatigue: state.totalFatigue,
     totalWalkingHours: state.totalWalkingHours,
@@ -472,11 +586,17 @@ function candidateRouteSort(a, b, routeLocation) {
   return b.itineraryScore - a.itineraryScore;
 }
 
-function trySchedulePlace({ place, routeLocation, state, constraints }) {
+function trySchedulePlace({ place, routeLocation, state, constraints, dayEndTime }) {
   if ((place.routeLocation || place.city) !== routeLocation) {
     return {
       feasible: false,
       reason: "Skipped to avoid cross-cluster backtracking inside the day."
+    };
+  }
+  if (place.temporarilyClosed || place.availabilityStatus === "closed") {
+    return {
+      feasible: false,
+      reason: `${place.name} is closed according to live opening-hours data.`
     };
   }
 
@@ -487,7 +607,7 @@ function trySchedulePlace({ place, routeLocation, state, constraints }) {
   const earliestStart = Math.max(state.currentMinutes, openingMinutes);
   const startMinutes = preferredStart >= earliestStart
     && preferredStart + durationMinutes <= closingMinutes
-    && preferredStart + durationMinutes <= toMinutes(constraints.dayEndTime)
+    && preferredStart + durationMinutes <= toMinutes(dayEndTime)
     ? preferredStart
     : earliestStart;
   const endMinutes = startMinutes + durationMinutes;
@@ -501,7 +621,7 @@ function trySchedulePlace({ place, routeLocation, state, constraints }) {
       reason: `${place.name} would end after closing time.`
     };
   }
-  if (endMinutes > toMinutes(constraints.dayEndTime)) {
+  if (endMinutes > toMinutes(dayEndTime)) {
     return {
       feasible: false,
       reason: `${place.name} would exceed the day limit.`
@@ -549,6 +669,8 @@ function trySchedulePlace({ place, routeLocation, state, constraints }) {
       estimatedCost: place.estimatedCost,
       estimatedGroupCost,
       itineraryScore: place.itineraryScore,
+      realtimeScoreAdjustment: place.realtimeScoreAdjustment || 0,
+      realtime: place.realtime,
       reasons: buildActivityReasons(place, constraints)
     }
   };
@@ -560,6 +682,8 @@ function buildActivityReasons(place, constraints) {
   if (place.family_friendly) reasons.push("family friendly");
   if (place.idealTime) reasons.push(`best around ${place.idealTime}`);
   if (place.budget_level <= 2) reasons.push("keeps activity budget controlled");
+  if (place.realtime?.seasonalAssessment?.scoreAdjustment > 0) reasons.push("strong seasonal fit");
+  if (place.realtime?.weatherAssessment?.scoreAdjustment > 0) reasons.push("good weather backup");
   if (place.routeLocation || place.city) reasons.push(`fits the ${place.routeLocation || place.city} route cluster`);
   return reasons.slice(0, 4);
 }
@@ -631,6 +755,18 @@ function calculateItineraryTotals(days) {
 
 function buildDayAliases(days) {
   return Object.fromEntries(days.map((day) => [`day${day.day}`, day.activities]));
+}
+
+function resolveDayStartTime(dayNumber, constraints) {
+  return constraints.dayStartOverrides?.[dayNumber]
+    || constraints.dayStartOverrides?.[String(dayNumber)]
+    || constraints.dayStartTime;
+}
+
+function resolveDayEndTime(dayNumber, constraints) {
+  return constraints.dayEndOverrides?.[dayNumber]
+    || constraints.dayEndOverrides?.[String(dayNumber)]
+    || constraints.dayEndTime;
 }
 
 function hasNoBacktracking(days) {

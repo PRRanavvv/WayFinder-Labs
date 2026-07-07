@@ -103,6 +103,7 @@ export async function createLocalRetrievalPipeline({
         ...record,
         retrievalScore: Number((record.hybridScore * 100).toFixed(2)),
         retrievalConfidence: confidenceFromScore(record.hybridScore),
+        confidence: Number(record.hybridScore.toFixed(2)),
         queryIntent: understood.intent,
         retrievalReason: explainContextMatch(record)
       }));

@@ -22,9 +22,15 @@ Included:
 - Constraint-based optimization layer
 - Deterministic Itinerary Intelligence v1
 - Route-aware scheduling, opening-hour checks, and fatigue limits
+- Real-time itinerary intelligence for weather, opening-hour overrides, and seasonal scoring
+- 100-scenario itinerary benchmark
+- Production edge-case benchmark for ugly user inputs, fallbacks, and confidence scoring
 - Recommendation explanation engine
 - Recommendation Ranking Engine v1
 - Configurable recommendation profiles and group satisfaction scoring
+- Group Preference Fusion for trip DNA, conflict detection, and fairness targets
+- Stability Engine for minimal-change itinerary replans
+- Explanation cards for group fusion, stable replans, and recommendation selection
 - Decision quality evaluation metrics
 - Decision logs for explainability and debugging
 - Simple preference memory update loop
@@ -88,10 +94,29 @@ Run deterministic itinerary checks:
 npm run test:itinerary --workspace ai-engine
 ```
 
+Run itinerary benchmark:
+
+```bash
+npm run benchmark:itinerary --workspace ai-engine
+```
+
+Run production edge-case checks:
+
+```bash
+npm run test:edge-cases --workspace ai-engine
+npm run benchmark:edge-cases --workspace ai-engine
+```
+
 Run recommendation ranking checks:
 
 ```bash
 npm run test:recommendations --workspace ai-engine
+```
+
+Run group intelligence checks:
+
+```bash
+npm run test:group-intelligence --workspace ai-engine
 ```
 
 Dataset and architecture references:
@@ -106,7 +131,15 @@ Dataset and architecture references:
 - `ai-engine/src/retrieval/hardRetrievalBenchmark.js`
 - `ai-engine/src/retrieval/benchmarkLeakage.js`
 - `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
+- `ai-engine/src/intelligence/confidenceScoring.js`
+- `ai-engine/src/intelligence/productionGuards.js`
+- `ai-engine/src/intelligence/groupPreferenceFusion.js`
 - `ai-engine/src/intelligence/recommendationEngine.js`
+- `ai-engine/src/intelligence/explanationEngine.js`
+- `ai-engine/src/evaluation/productionEdgeCases.js`
 - `ai-engine/src/itinerary/deterministicPlanner.js`
+- `ai-engine/src/itinerary/stabilityEngine.js`
+- `ai-engine/src/itinerary/realtimeIntelligence.js`
+- `ai-engine/src/itinerary/itineraryBenchmark.js`
 - `ai-engine/src/itinerary/travelGraph.js`
 - `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`
