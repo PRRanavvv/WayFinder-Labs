@@ -1,27 +1,26 @@
 # WayFinder AI/ML Brain Architecture
 
-This document describes the intended final AI/ML workflow behind WayFinder: the data layer, model layer, ranking engine, itinerary optimizer, collaboration engine, and continuous learning loop. The current mock pipeline is a local, deterministic version of this architecture so the team can test product behavior before expensive model and infrastructure work.
+This document describes the intended final AI/ML workflow behind WayFinder: the data layer, model layer, ranking engine, itinerary optimizer, collaboration engine, and continuous learning loop. The active engine is now a Python/FastAPI service in `ai-engine/app/`. It intentionally starts with deterministic, testable planning primitives before expensive model and infrastructure work is added.
 
 ## Product Goal
 
 WayFinder should beat generic trip planners by behaving like a travel operating system, not a static itinerary generator. The AI brain must understand destination context, group preferences, budget, timing, fatigue, route flow, weather, visual grounding, and collaborative changes. The output should feel explainable, editable, and locally aware.
 
-## Current Prototype Foundation
+## Current Python Foundation
 
 The current AI engine already has the first version of these layers:
 
-- Global destination seed data: `mock_ai_pipeline/data/destinationPlaceIntelligence.js`
-- Destination visual registry: `mock_ai_pipeline/data/destinationVisualAssets.js`
-- Jaipur deep seed data: `mock_ai_pipeline/data/jaipurPlaceIntelligence.js`
-- Unified legacy candidate adapter: `mock_ai_pipeline/data/places.js`
-- Retrieval: `mock_ai_pipeline/src/retrieveCandidates.js`
-- Ranking: `mock_ai_pipeline/src/scoreCandidates.js`
-- Optimization: `mock_ai_pipeline/src/optimizeItinerary.js`
-- JSON generation: `mock_ai_pipeline/src/generateItineraryJson.js`
-- Validation: `mock_ai_pipeline/src/validateItinerary.js`
-- Explanations and reliability: `mock_ai_pipeline/src/generateExplanations.js`, `mock_ai_pipeline/src/evaluatePipeline.js`
-- Partial regeneration: `mock_ai_pipeline/src/partialRegeneration/partialRegenerationEngine.js`
-- Audits: `mock_ai_pipeline/runJaipurSeedAudit.js`, `mock_ai_pipeline/runDestinationSeedAudit.js`
+- FastAPI application boundary: `app/main.py`
+- Request contracts: `app/schemas.py`
+- Seed place data and route profiles: `app/services/data.py`
+- Group Preference Fusion: `app/services/group_preference_fusion.py`
+- Retrieval primitives: `app/services/retrieval_engine.py`
+- Recommendation ranking: `app/services/recommendation_engine.py`
+- Deterministic itinerary planning: `app/services/itinerary_planner.py`
+- Stability/minimal-change replanning: `app/services/stability_engine.py`
+- Explanation cards: `app/services/explanation_engine.py`
+- Confidence scoring: `app/services/confidence.py`
+- Active tests: `tests/test_*.py`
 
 ## High-Level System Flow
 
@@ -99,7 +98,7 @@ Retrieval should be hybrid:
 - Vector retrieval over `embedding.embeddingText` once embeddings are connected.
 - Geo retrieval for nearby alternatives during partial regeneration.
 
-Current mock behavior approximates this with token expansion and deterministic semantic scoring. Final production behavior should use a vector database plus lexical filters.
+Current Python behavior approximates this with token expansion and deterministic semantic scoring. Final production behavior should use a vector database plus lexical filters, but the service contract should remain stable.
 
 ## Ranking Layer
 
@@ -139,7 +138,7 @@ It should:
 - Account for weather and indoor fallback needs.
 - Produce explainable sequencing decisions.
 
-Current implementation already prevents impossible travel hops and schedules only feasible same-day activity flows.
+Current implementation already prevents impossible travel hops and schedules only feasible same-day activity flows through the Python deterministic planner.
 
 ## Itinerary JSON Contract
 
@@ -155,6 +154,28 @@ The AI output should be a strict product contract:
 - Explanation blocks for why each activity was chosen.
 
 This gives the frontend, backend, and model layer a stable shared surface.
+
+## Main App Integration Boundary
+
+The Next.js monolith should integrate with the AI engine as a separate HTTP service, not by importing Python internals.
+
+Recommended boundary:
+
+```text
+frontend/src/ml-client/
+  -> typed fetch client
+  -> Zod validation of every response
+  -> timeout and retry policy
+  -> converts AI JSON into tRPC-safe DTOs
+
+ai-engine/app/main.py
+  -> FastAPI endpoints
+  -> Pydantic request validation
+  -> deterministic planning and recommendation services
+  -> no direct Supabase or frontend database writes
+```
+
+Important rule: the AI service returns structured planning intelligence and place names/IDs from its own seed set. The Next.js monolith remains responsible for auth, persistence, geocoding, Google Places verification, and final coordinate storage.
 
 ## Validation And Reliability
 
@@ -310,21 +331,22 @@ Before a destination seed or model version is trusted, it should pass:
 Current commands:
 
 ```bash
-npm run audit:jaipur
-npm run audit:destinations
-npm run audit:adaptive
-npm run evaluate
-npm run build
+npm run dev --workspace ai-engine
+npm run test --workspace ai-engine
+npm run test:group-intelligence --workspace ai-engine
+npm run test:itinerary --workspace ai-engine
+npm run test:recommendations --workspace ai-engine
+npm run test:api --workspace ai-engine
 ```
 
 ## Roadmap To Final Version
 
-Phase 1: Strong Mock Intelligence
+Phase 1: Strong Python Intelligence
 
-- Maintain Jaipur as the deep benchmark.
-- Expand top global destinations with structured seed data.
-- Remove random visuals and use grounded assets only.
-- Keep audits strict.
+- Keep FastAPI contracts stable.
+- Expand top global destinations with structured Python seed data.
+- Keep deterministic planning tests strict.
+- Keep geocoding and verified coordinates outside the AI service.
 
 Phase 2: Real Retrieval Service
 
@@ -335,7 +357,7 @@ Phase 2: Real Retrieval Service
 
 Phase 3: AI Planner Service
 
-- Wrap retrieval, ranking, optimization, validation, and explanation behind an API.
+- Harden retrieval, ranking, optimization, validation, and explanation behind the FastAPI API.
 - Add model prompts only after candidate grounding.
 - Add confidence and fallback reporting.
 
@@ -361,4 +383,3 @@ Phase 5: Continuous Learning
 - Always preserve locked user choices during regeneration.
 - Always expose why a recommendation was chosen.
 - Always keep a validation and confidence layer between AI output and user trust.
-
