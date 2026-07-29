@@ -1,112 +1,50 @@
 # WayFinder AI Engine
 
-This public module demonstrates the shape of the WayFinder planning engine without exposing private scoring logic, proprietary datasets, or internal experimentation systems.
+Python/FastAPI travel intelligence for WayFinder. This service owns preference
+fusion, retrieval and ranking, itinerary planning, stable replanning,
+confidence, feasibility, and explanations.
 
-Included:
-- Sample semantic ranker
-- Public-safe retrieval index
-- Global destination mock dataset
-- Enriched place metadata for retrieval evaluation
-- Travel climate and season knowledge layer
-- Query understanding before retrieval
-- Grounded destination and place visual assets
-- Embeddings-ready sample metadata
-- Metadata-aware chunking pipeline
-- BGE Small embedding provider boundary
-- Hybrid retrieval scoring with explainable reasons
-- Local vector store and Qdrant adapter
-- Retrieval benchmark scripts
-- 100 retrieval evaluation prompts
-- Deterministic decision ranking engine
-- Retrieval-to-ranking intelligence flow
-- Constraint-based optimization layer
-- Deterministic Itinerary Intelligence v1
-- Route-aware scheduling, opening-hour checks, and fatigue limits
-- Recommendation explanation engine
-- Recommendation Ranking Engine v1
-- Configurable recommendation profiles and group satisfaction scoring
-- Decision quality evaluation metrics
-- Decision logs for explainability and debugging
-- Simple preference memory update loop
-- Demo itinerary lifecycle
-- Non-sensitive sample places
-- Final AI/ML workflow architecture document
+It does not own authentication, application jobs, Supabase writes, geocoding,
+verified coordinates, or frontend state.
 
-Excluded:
-- Production ranking weights
-- Advanced route optimization
-- Private evaluation harnesses
-- Vendor prompts, keys, and orchestration internals
+## Structure
 
-Run the demo:
+```text
+app/api/         FastAPI routes
+app/contracts/   Pydantic request contracts
+app/core/        Shared configuration and primitives
+app/engines/     Deterministic intelligence
+app/providers/   Replaceable data providers
+evals/           Quality cases, metrics, and runner
+infra/           Optional AI-owned infrastructure definitions
+scripts/         Developer utilities
+tests/           Unit, contract, and evaluation tests
+docs/            Technical documentation
+```
+
+## Commands
+
+From the repository root:
 
 ```bash
+npm run dev --workspace ai-engine
 npm run demo --workspace ai-engine
+npm run evaluate --workspace ai-engine
+npm run test --workspace ai-engine
 ```
 
-Run the retrieval demo:
+Focused checks:
 
 ```bash
-npm run demo:retrieval --workspace ai-engine
+npm run test:unit --workspace ai-engine
+npm run test:contract --workspace ai-engine
+npm run test:evaluation --workspace ai-engine
 ```
 
-Run retrieval benchmarks:
+## Documentation
 
-```bash
-npm run benchmark:retrieval --workspace ai-engine
-```
-
-Run the messy hard retrieval benchmark:
-
-```bash
-npm run benchmark:retrieval:hard --workspace ai-engine
-```
-
-Index enriched place records into Qdrant:
-
-```bash
-QDRANT_URL=http://localhost:6333 npm run qdrant:index --workspace ai-engine
-```
-
-`qdrant:index` defaults to BGE Small through Transformers.js. Local tests use deterministic hash embeddings so the public repo remains runnable without model downloads.
-
-Run intelligence flow:
-
-```bash
-npm run demo:intelligence --workspace ai-engine
-```
-
-Run decision-quality optimization:
-
-```bash
-npm run demo:decision-quality --workspace ai-engine
-```
-
-Run deterministic itinerary checks:
-
-```bash
-npm run test:itinerary --workspace ai-engine
-```
-
-Run recommendation ranking checks:
-
-```bash
-npm run test:recommendations --workspace ai-engine
-```
-
-Dataset and architecture references:
-
-- `ai-engine/src/datasets/globalDestinationDataset.js`
-- `ai-engine/src/datasets/enrichedPlaces.js`
-- `ai-engine/src/datasets/travelKnowledge.js`
-- `ai-engine/src/datasets/destinationVisualAssets.js`
-- `ai-engine/src/datasets/README.md`
-- `ai-engine/src/retrieval/hybridScoring.js`
-- `ai-engine/src/retrieval/queryUnderstanding.js`
-- `ai-engine/src/retrieval/hardRetrievalBenchmark.js`
-- `ai-engine/src/retrieval/benchmarkLeakage.js`
-- `ai-engine/src/retrieval/retrievalEvaluationPrompts.js`
-- `ai-engine/src/intelligence/recommendationEngine.js`
-- `ai-engine/src/itinerary/deterministicPlanner.js`
-- `ai-engine/src/itinerary/travelGraph.js`
-- `ai-engine/AI_ML_WORKFLOW_ARCHITECTURE.md`
+- `docs/index.md`
+- `docs/architecture.md`
+- `docs/api-contract.md`
+- `docs/dataset.md`
+- `docs/vector-store.md`

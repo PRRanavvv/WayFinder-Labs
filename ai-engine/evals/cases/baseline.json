@@ -1,0 +1,46 @@
+[
+  {
+    "id": "kerala-parent-friendly",
+    "input": {
+      "destination": "Kerala",
+      "days": 4,
+      "budget": 50000,
+      "group": {
+        "adults": 2,
+        "parents": true
+      }
+    }
+  },
+  {
+    "id": "rajasthan-budget-heritage",
+    "input": {
+      "destination": "Rajasthan",
+      "days": 3,
+      "budget": 30000,
+      "group": {
+        "adults": 2
+      },
+      "preferences": {
+        "interests": [
+          "heritage",
+          "food"
+        ],
+        "pace": "balanced"
+      }
+    }
+  },
+  {
+    "id": "kerala-blocked-place",
+    "input": {
+      "destination": "Kerala",
+      "days": 3,
+      "budget": 40000,
+      "group": {
+        "adults": 2
+      },
+      "blockedPlaceIds": [
+        "kerala_002"
+      ]
+    }
+  }
+]

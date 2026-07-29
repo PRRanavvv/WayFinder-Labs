@@ -1,29 +1,15 @@
 {
   "name": "@wayfinder/ai-engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "type": "module",
+  "description": "Python/FastAPI travel-intelligence service for WayFinder.",
   "scripts": {
-    "demo": "node examples/demo.js",
-    "demo:retrieval": "node examples/retrievalDemo.js",
-    "demo:intelligence": "node examples/intelligenceFlowDemo.js",
-    "demo:decision-quality": "node examples/decisionQualityDemo.js",
-    "ingest:retrieval": "node scripts/ingestRetrieval.js",
-    "reindex:retrieval": "node scripts/reindexRetrieval.js",
-    "qdrant:index": "node scripts/indexQdrant.js",
-    "benchmark:retrieval": "node scripts/benchmarkRetrieval.js",
-    "benchmark:retrieval:hard": "node scripts/benchmarkHardRetrieval.js",
-    "analyze:retrieval-failures": "node scripts/analyzeRetrievalFailures.js",
-    "analyze:benchmark-leakage": "node scripts/analyzeBenchmarkLeakage.js",
-    "test:retrieval": "node tests/retrieval.test.js",
-    "test:retrieval:hard": "node tests/hardRetrievalBenchmark.test.js",
-    "test:intelligence": "node tests/intelligenceFlow.test.js",
-    "test:decision-quality": "node tests/decisionQuality.test.js",
-    "test:itinerary": "node tests/itineraryPlanner.test.js",
-    "test:recommendations": "node tests/recommendationEngine.test.js"
-  },
-  "optionalDependencies": {
-    "@huggingface/transformers": "^3.8.1",
-    "pg": "^8.13.1"
+    "dev": "python -m uvicorn app.main:app --reload --port 8000",
+    "demo": "python -m scripts.demo",
+    "evaluate": "python -m evals.runner",
+    "test": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "test:unit": "python -m unittest discover -s tests/unit -p \"test_*.py\"",
+    "test:contract": "python -m unittest discover -s tests/contract -p \"test_*.py\"",
+    "test:evaluation": "python -m unittest discover -s tests/evaluation -p \"test_*.py\""
   }
 }
