@@ -1,22 +1,22 @@
 """WayFinder AI engine Python package."""
 
-from .services.explanation_engine import (
+from .engines.explanation_engine import (
     explain_group_preference_fusion,
     explain_recommendation_selection,
     explain_stable_replan,
 )
-from .services.group_preference_fusion import (
+from .engines.group_preference_fusion import (
     build_trip_dna,
     fuse_group_preferences,
     score_place_against_trip_dna,
 )
-from .services.itinerary_planner import (
+from .engines.itinerary_planner import (
     plan_deterministic_itinerary,
     replan_deterministic_itinerary,
     validate_deterministic_itinerary,
 )
-from .services.recommendation_engine import rank_destination_recommendations
-from .services.stability_engine import replan_with_stability, stabilize_itinerary
+from .engines.recommendation_engine import rank_destination_recommendations
+from .engines.stability_engine import replan_with_stability, stabilize_itinerary
 
 __all__ = [
     "build_trip_dna",
